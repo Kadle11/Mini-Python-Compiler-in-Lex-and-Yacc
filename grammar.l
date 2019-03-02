@@ -2,8 +2,8 @@
 	#include <string.h>
 	#include "y.tab.h"
 	#define stack_size 100
-	
-	extern char* yylval;
+	char *p;
+	//extern char* yylval;
 	
  	static int sp=0, stack [stack_size];
  	static void push (int i) 
@@ -37,7 +37,7 @@
 		return tab_count;
 	}	
  	int depth = 0;
- 	
+ 		
 %}
 %option yylineno
 whitespace [ ]
@@ -96,14 +96,14 @@ Multiline_comment \'\'\'.+\'\'\'
 "[" {return OB;}
 "]" {return CB;}
 "," {return CM;}
-"=" {/*printf("EQL\n"); */return EQL;}
-[0-9]+ {/*printf("NUM\n"); */return NUM;}
-[_a-zA-Z][_a-zA-Z0-9]* {/*printf("VAR\n"); */return VAR;}
-\"([^\"\n])*\" {/*printf("STR_CNST\n"); */return STR;}
-\'([^\'\n])*\' {/*printf("STR_CNST\n"); */return STR;}
+"=" {return EQL;}
+[0-9]+ {yylval.text = strdup(yytext); return NUM;}
+[_a-zA-Z][_a-zA-Z0-9]* {yylval.text = strdup(yytext); return VAR;}
+\"([^\"\n])*\" {yylval.text = strdup(yytext); return STR;}
+\'([^\'\n])*\' {yylval.text = strdup(yytext); return STR;}
 "#"([a-z]|[0-9]|[A-Z]|" ")* {}
-{whitespace} {/*printf("Space\n");*/;} 
-"'''" {/*printf("Trip_Quote\n"); */return Trip_Quote;}
+{whitespace} {} 
+"'''" {return Trip_Quote;}
 "\n" {return NL;}
 
 %%
