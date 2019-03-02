@@ -9,6 +9,8 @@
 	{
 		char *type;
 		char *name;
+		int decLineNo;
+		int lastUseLine;
 	} record;
 	
 	record *symbolTable = NULL;
@@ -36,10 +38,9 @@
 	
 	void modifyRecord(int rIndex, const char *type, const char *name)
 	{
-			strcpy(symbolTable[rIndex].type, type);
-			strcpy(symbolTable[rIndex].name, name);	
-
+			symbolTable[rIndex].lastUseLine = yylineno;
 	}
+	
 	void insertRecord(const char* type, const char *name)
 	{ 
 		int recordIndex = searchRecord(type, name);
@@ -50,7 +51,10 @@
 			symbolTable[sIndex].name = (char*)calloc(20, sizeof(char));
 		
 			strcpy(symbolTable[sIndex].type, type);	
-			strcpy(symbolTable[sIndex].name, name);		
+			strcpy(symbolTable[sIndex].name, name);
+			symbolTable[sIndex].decLineNo = yylineno;
+			symbolTable[sIndex].lastUseLine = yylineno;
+			
 		}
 		else
 		{
@@ -74,64 +78,64 @@
 */
 	void printSTable()
 	{
-		printf("\n\nSl No.\tSymbol\t\tType\n\n");
+		printf("\n\nSl No.\tSymbol\t\tType\t\tDeclaration Line\t\tLast Used Line\n\n");
 		int i = 0;
 		for(i=0; i<=sIndex; i++)
 		{
-			printf("%d\t%s\t\t%s\n", i+1, symbolTable[i].name, symbolTable[i].type);
+			printf("%d\t%s\t\t%s\t\t%d\t\t%d\n", i+1, symbolTable[i].name, symbolTable[i].type, symbolTable[sIndex].decLineNo, symbolTable[sIndex].lastUseLine);
 		}
 	}
 %}
 
 %union { char *text; };
    	  
-%token NUM TR FL VAR SPC PRINT CLN NL EQL L_Paren R_Paren NEQ EQ GT LT EGT ELT OR AND NOT ID ND DD STR Trip_Quote HASH IF ELIF WHILE ELSE IMPT BREAK PASS MN PL DV ML OP CP OB CB DEF CM
+%token T_Number T_True T_False T_ID T_Print T_Cln T_NL T_EQL T_NEQ T_EQ T_GT LT T_EGT T_ELT T_Or T_And T_Not ID ND DD T_String Trip_Quote T_If T_Elif T_While T_Else T_Import T_Break T_Pass T_MN T_PL T_DV T_ML T_OP T_CP T_OB T_CB T_Def T_Comma
 
-%right EQL                                          
-%left PL MN
-%left ML DV
+%right T_EQL                                          
+%left T_PL T_MN
+%left T_ML T_DV
 
 %%
-StartDebugger : {init();} StartParse NL {printf("Valid Python Syntax\n"); printSTable(); exit(0);} ;
-constant : NUM {insertRecord("Const", $<text>1);}| STR {insertRecord("Const", $<text>1);} ;
-term : VAR {insertRecord("Identifier", $<text>1);}| | constant ;
+StartDebugger : {init();} StartParse T_NL {printf("Valid Python Syntax\n"); printSTable(); exit(0);} ;
+constant : T_Number {insertRecord("Const", $<text>1);}| T_String {insertRecord("Const", $<text>1);} ;
+term : T_ID {insertRecord("Identifier", $<text>1);}| | constant ;
 StartParse : finalStatements ;
 Expressions :  arith_exp | bool_exp ;
 basic_stmt : pass_stmt | break_stmt | import_stmt | assign_stmt | Expressions | print_stmt;
-arith_exp :  term | arith_exp  PL  arith_exp |
-			    arith_exp  MN  arith_exp |
-			    arith_exp  ML  arith_exp |
-			    arith_exp  DV  arith_exp | 
-			    OP arith_exp CP ;
-ROP : GT | LT | ELT | EGT ;
-bool_exp : TR | FL | OP bool_exp CP | arith_exp ROP arith_exp 
-			 | bool_exp AND bool_exp
-			 | bool_exp OR bool_exp
-			 | NOT  bool_exp
-			 | Expressions EQ Expressions | Expressions NOT EQL Expressions | Expressions NEQ Expressions ;
+arith_exp :  term | arith_exp  T_PL  arith_exp |
+			    arith_exp  T_MN  arith_exp |
+			    arith_exp  T_ML  arith_exp |
+			    arith_exp  T_DV  arith_exp | 
+			    T_OP arith_exp T_CP ;
+ROP : T_GT | LT | T_ELT | T_EGT ;
+bool_exp : T_True | T_False | T_OP bool_exp T_CP | arith_exp ROP arith_exp 
+			 | bool_exp T_And bool_exp
+			 | bool_exp T_Or bool_exp
+			 | T_Not  bool_exp
+			 | Expressions T_EQ Expressions | Expressions T_Not T_EQL Expressions | Expressions T_NEQ Expressions ;
 
-import_stmt : IMPT VAR ;
-pass_stmt : PASS ;
-break_stmt : BREAK ;
-assign_stmt : VAR {insertRecord("Identifier", $<text>1);} EQL Expressions | VAR {insertRecord("Identifier", $<text>1);} EQL func_call ;
-print_stmt : PRINT OP STR CP ;
+import_stmt : T_Import T_ID ;
+pass_stmt : T_Pass ;
+break_stmt : T_Break ;
+assign_stmt : T_ID {insertRecord("Identifier", $<text>1);} T_EQL Expressions | T_ID {insertRecord("Identifier", $<text>1);} T_EQL func_call ;
+print_stmt : T_Print T_OP T_String T_CP ;
 
 finalStatements : basic_stmt | cmpd_stmt | func_def ;
 
 cmpd_stmt : if_stmt | while_stmt ;
 
-if_stmt : IF bool_exp CLN start_suite elif_stmts ;
-elif_stmts : | ELIF bool_exp CLN start_suite elif_stmts | else_stmts ;
-else_stmts : ELSE CLN start_suite ;
+if_stmt : T_If bool_exp T_Cln start_suite elif_stmts ;
+elif_stmts : | T_Elif bool_exp T_Cln start_suite elif_stmts | else_stmts ;
+else_stmts : T_Else T_Cln start_suite ;
 
-while_stmt : WHILE bool_exp CLN start_suite; 
-start_suite : basic_stmt | NL ID finalStatements suite;
-suite : NL ND finalStatements suite | NL end_suite;
+while_stmt : T_While bool_exp T_Cln start_suite; 
+start_suite : basic_stmt | T_NL ID finalStatements suite;
+suite : T_NL ND finalStatements suite | T_NL end_suite;
 end_suite : DD finalStatements | ;
 
-args_list : VAR CM args_list | VAR | ;
-func_def : DEF VAR {insertRecord("Func_Name", $<text>1);} OP args_list CP CLN start_suite;
-func_call : VAR OP args_list CP
+args_list : T_ID T_Comma args_list | T_ID | ;
+func_def : T_Def T_ID {insertRecord("Func_Name", $<text>1);} T_OP args_list T_CP T_Cln start_suite;
+func_call : T_ID T_OP args_list T_CP
 %%
 
 void yyerror(const char *msg)

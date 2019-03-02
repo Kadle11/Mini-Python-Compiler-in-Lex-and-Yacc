@@ -66,44 +66,43 @@ Multiline_comment \'\'\'.+\'\'\'
 				return ID;
 			}
 		}
-"import" {/*printf("IMPT \n");*/ return IMPT;}
-"print"  {return PRINT;}
-"pass" {return PASS;}
-"if" {return IF;}
-"while" {return WHILE;}
-"break" {return BREAK;}
-"and" {return AND;}
-"or" {return OR;}
-"not" {return NOT;}
-"elif" {return ELIF;}
-"else" {return ELSE;}
-"def" {return DEF;}
-":" {return CLN;}
-">" {return GT;}
+"import" {/*printf("IMPT \n");*/ return T_Import;}
+"print"  {return T_Print;}
+"pass" {return T_Pass;}
+"if" {return T_If;}
+"while" {return T_While;}
+"break" {return T_Break;}
+"and" {return T_And;}
+"or" {return T_Or;}
+"not" {return T_Not;}
+"elif" {return T_Elif;}
+"else" {return T_Else;}
+"def" {return T_Def;}
+":" {return T_Cln;}
+">" {return T_GT;}
 "<" {return LT;}
-">=" {return EGT;}
-"<=" {return ELT;}
-"==" {return EQ;}
-"!=" {return NEQ;}
-"True" {return TR;}
-"False" {return FL;}
-"+" {return PL;}
-"-" {return MN;}
-"*" {return ML;}
-"/" {return DV;}
-"(" {return OP;}
-")" {return CP;}
-"[" {return OB;}
-"]" {return CB;}
-"," {return CM;}
-"=" {return EQL;}
-[0-9]+ {yylval.text = strdup(yytext); return NUM;}
-[_a-zA-Z][_a-zA-Z0-9]* {yylval.text = strdup(yytext); return VAR;}
-\"([^\"\n])*\" {yylval.text = strdup(yytext); return STR;}
-\'([^\'\n])*\' {yylval.text = strdup(yytext); return STR;}
+">=" {return T_EGT;}
+"<=" {return T_ELT;}
+"==" {return T_EQ;}
+"!=" {return T_NEQ;}
+"True" {return T_True;}
+"False" {return T_False;}
+"+" {return T_PL;}
+"-" {return T_MN;}
+"*" {return T_ML;}
+"/" {return T_DV;}
+"(" {return T_OP;}
+")" {return T_CP;}
+"[" {return T_OB;}
+"]" {return T_CB;}
+"," {return T_Comma;}
+"=" {return T_EQL;}
+[0-9]+ {yylval.text = strdup(yytext); return T_Number;}
+[_a-zA-Z][_a-zA-Z0-9]* {yylval.text = strdup(yytext); return T_ID;}
+\"([^\"\n])*\" {yylval.text = strdup(yytext); return T_String;}
+\'([^\'\n])*\' {yylval.text = strdup(yytext); return T_String;}
 "#"([a-z]|[0-9]|[A-Z]|" ")* {}
 {whitespace} {} 
-"'''" {return Trip_Quote;}
-"\n" {return NL;}
+"\n" {return T_NL;}
 
 %%
