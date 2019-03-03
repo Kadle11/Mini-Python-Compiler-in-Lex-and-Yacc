@@ -2,9 +2,13 @@
 	#include <string.h>
 	#include "y.tab.h"
 	#define stack_size 100
-	char *p;
-	//extern char* yylval;
 	
+	int yycolumn = 1;
+	
+	#define YY_USER_ACTION yylloc.first_line = yylloc.last_line = yylineno; 		\
+    yylloc.first_column = yycolumn; yylloc.last_column = yycolumn + yyleng - 1; 	\
+    yycolumn += yyleng; 												
+    
  	static int sp=0, stack [stack_size];
  	static void push (int i) 
  	{
