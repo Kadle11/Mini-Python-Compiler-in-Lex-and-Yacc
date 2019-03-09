@@ -7,7 +7,7 @@
 	
 	#define YY_USER_ACTION yylloc.first_line = yylloc.last_line = yylineno; 		\
     yylloc.first_column = yycolumn; yylloc.last_column = yycolumn + yyleng - 1; 	\
-    yycolumn += yyleng; 												
+    yycolumn += yyleng;												
     
  	static int sp=0, stack [stack_size];
  	static void push (int i) 
@@ -101,12 +101,15 @@ Multiline_comment \'\'\'.+\'\'\'
 "]" {return T_CB;}
 "," {return T_Comma;}
 "=" {return T_EQL;}
+"range" {return T_Range;}
+"list" {return T_List;}
 [0-9]+ {yylval.text = strdup(yytext); return T_Number;}
 [_a-zA-Z][_a-zA-Z0-9]* {yylval.text = strdup(yytext); return T_ID;}
 \"([^\"\n])*\" {yylval.text = strdup(yytext); return T_String;}
 \'([^\'\n])*\' {yylval.text = strdup(yytext); return T_String;}
 "#"([a-z]|[0-9]|[A-Z]|" ")* {}
 {whitespace} {} 
-"\n" {return T_NL;}
+"\n" {yycolumn=1; return T_NL;}
+<<EOF>> {return T_EndOfFile;}
 
 %%

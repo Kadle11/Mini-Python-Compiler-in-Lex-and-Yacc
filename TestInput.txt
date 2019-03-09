@@ -1,0 +1,9 @@
+import XYZ
+while(x==y):
+	c=0 
+	if(z==b):
+		c=10
+
+
+if(x==5):
+	a=0
