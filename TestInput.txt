@@ -4,4 +4,6 @@ while(x==y):
 	c=0 
 	if(z==b):
 		c=10
-
+	if(x==y):
+		a=10
+	w=21

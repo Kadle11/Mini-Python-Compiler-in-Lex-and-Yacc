@@ -6,6 +6,9 @@
 	extern int yylineno;
 	int currentScope = 0, previousScope = 0;
 	
+	int *arrayScope = NULL;
+	
+	
 	typedef struct record
 	{
 		char *type;
@@ -27,6 +30,15 @@
 	STable *symbolTables = NULL;
 	int sIndex = -1;
 	
+	int power(int base, int exp)
+	{
+		int i =0, res = 1;
+		for(i; i<exp; i++)
+		{
+			res *= base;
+		}
+		return res;
+	}
 	void updateCScope(int scope)
 	{
 		currentScope = scope;
@@ -46,9 +58,10 @@
 	}
 	void initNewTable(int scope)
 	{
+		arrayScope[scope]++;
 		sIndex++;
 		symbolTables[sIndex].no = sIndex;
-		symbolTables[sIndex].scope = scope;
+		symbolTables[sIndex].scope = power(scope, arrayScope[scope]);
 		symbolTables[sIndex].noOfElems = 0;		
 		symbolTables[sIndex].Elements = (record*)calloc(20, sizeof(record));
 		
@@ -58,6 +71,7 @@
 	void init()
 	{
 		symbolTables = (STable*)calloc(100, sizeof(STable));
+		arrayScope = (int*)calloc(5, sizeof(int));
 		initNewTable(0);
 		
 	}
@@ -110,7 +124,8 @@
 	
 	void insertRecord(const char* type, const char *name, int lineNo, int scope)
 	{ 
-		int index = scopeBasedTableSearch(scope);
+		int FScope = power(scope, arrayScope[scope]);
+		int index = scopeBasedTableSearch(FScope);
 		int recordIndex = searchRecordInScope(type, name, index);
 		//printf("rIndex : %d, Name : %s\n", recordIndex, name);
 		if(recordIndex==-1)

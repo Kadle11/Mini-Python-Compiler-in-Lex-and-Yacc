@@ -2,7 +2,7 @@
 	#include <string.h>
 	#include "y.tab.h"
 	#define stack_size 100
-	//#define DEBUG 1
+	#define DEBUG 1
 	
 	int yycolumn = 1;
 	
@@ -70,20 +70,20 @@ Multiline_comment \'\'\'.+\'\'\'
 			{
 				while (depth < top()) pop();
 				yylval.depth = depth;
-				//printf("\tDD \n");
+				debug("DD");
 				return DD;
 			}
 			
 			if(depth == top())
 			{
-				//printf("\tND \n");
+				debug("ND");
 				yylval.depth = depth;
 				return ND;				
 			}
 			if(depth > top())
 			{
 				push(depth);
-				//printf("\tID \n");
+				debug("ID");
 				yylval.depth = depth;
 				return ID;
 			}
