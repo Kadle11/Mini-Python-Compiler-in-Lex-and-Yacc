@@ -561,6 +561,7 @@ char *yytext;
 	#include <string.h>
 	#include "y.tab.h"
 	#define stack_size 100
+	//#define DEBUG 1
 	
 	int yycolumn = 1;
 	
@@ -569,6 +570,20 @@ char *yytext;
     yycolumn += yyleng;												
     
  	static int sp=0, stack [stack_size];
+ 	
+ 	static void debug(const char *X)
+ 	{
+ 		#ifdef DEBUG
+ 		if(strcmp(X, "NL")==0)
+ 		{
+ 			printf("%s\n", X);
+ 		}
+		else
+		{
+			printf("%s ", X);	
+		}
+ 		#endif
+ 	}
  	static void push (int i) 
  	{
    		if (++sp<stack_size) stack[sp]= i;
@@ -601,7 +616,7 @@ char *yytext;
 	}	
  	int depth = 0;
  		
-#line 605 "lex.yy.c"
+#line 620 "lex.yy.c"
 
 #define INITIAL 0
 
@@ -819,10 +834,10 @@ YY_DECL
 		}
 
 	{
-#line 49 "grammar.l"
+#line 64 "grammar.l"
 
 
-#line 826 "lex.yy.c"
+#line 841 "lex.yy.c"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -891,13 +906,14 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 51 "grammar.l"
+#line 66 "grammar.l"
 {
 			depth = indent_depth(yytext);
 			//printf("Depth : %d ",  depth);
 			if(depth < top())
 			{
 				while (depth < top()) pop();
+				yylval.depth = depth;
 				//printf("\tDD \n");
 				return DD;
 			}
@@ -905,228 +921,230 @@ YY_RULE_SETUP
 			if(depth == top())
 			{
 				//printf("\tND \n");
+				yylval.depth = depth;
 				return ND;				
 			}
 			if(depth > top())
 			{
 				push(depth);
 				//printf("\tID \n");
+				yylval.depth = depth;
 				return ID;
 			}
-			yylval.depth = depth;
+			
 		}
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 74 "grammar.l"
-{/*printf("IMPT \n");*/ return T_Import;}
+#line 93 "grammar.l"
+{debug("IMPT"); return T_Import;}
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 75 "grammar.l"
-{return T_Print;}
+#line 94 "grammar.l"
+{debug("Print"); return T_Print;}
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 76 "grammar.l"
-{return T_Pass;}
+#line 95 "grammar.l"
+{debug("Pass"); return T_Pass;}
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 77 "grammar.l"
-{return T_If;}
+#line 96 "grammar.l"
+{debug("If"); return T_If;}
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 78 "grammar.l"
-{return T_While;}
+#line 97 "grammar.l"
+{debug("While"); return T_While;}
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 79 "grammar.l"
-{return T_Break;}
+#line 98 "grammar.l"
+{debug("Break"); return T_Break;}
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 80 "grammar.l"
-{return T_And;}
+#line 99 "grammar.l"
+{debug("And"); return T_And;}
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 81 "grammar.l"
-{return T_Or;}
+#line 100 "grammar.l"
+{debug("Or"); return T_Or;}
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 82 "grammar.l"
-{return T_Not;}
+#line 101 "grammar.l"
+{debug("Not"); return T_Not;}
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 83 "grammar.l"
-{return T_Elif;}
+#line 102 "grammar.l"
+{debug("Elif"); return T_Elif;}
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 84 "grammar.l"
-{return T_Else;}
+#line 103 "grammar.l"
+{debug("Else"); return T_Else;}
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 85 "grammar.l"
-{return T_Def;}
+#line 104 "grammar.l"
+{debug("Def"); return T_Def;}
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 86 "grammar.l"
-{return T_Cln;}
+#line 105 "grammar.l"
+{debug("Cln"); return T_Cln;}
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 87 "grammar.l"
-{return T_GT;}
+#line 106 "grammar.l"
+{debug("GT"); return T_GT;}
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 88 "grammar.l"
-{return LT;}
+#line 107 "grammar.l"
+{debug("LT"); return T_LT;}
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 89 "grammar.l"
-{return T_EGT;}
+#line 108 "grammar.l"
+{debug("EGT"); return T_EGT;}
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 90 "grammar.l"
-{return T_ELT;}
+#line 109 "grammar.l"
+{debug("ELT"); return T_ELT;}
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 91 "grammar.l"
-{return T_EQ;}
+#line 110 "grammar.l"
+{debug("EQ"); return T_EQ;}
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 92 "grammar.l"
-{return T_NEQ;}
+#line 111 "grammar.l"
+{debug("NEQ"); return T_NEQ;}
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 93 "grammar.l"
-{return T_True;}
+#line 112 "grammar.l"
+{debug("True"); return T_True;}
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 94 "grammar.l"
-{return T_False;}
+#line 113 "grammar.l"
+{debug("False"); return T_False;}
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 95 "grammar.l"
-{return T_PL;}
+#line 114 "grammar.l"
+{debug("PL"); return T_PL;}
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 96 "grammar.l"
-{return T_MN;}
+#line 115 "grammar.l"
+{debug("MN"); return T_MN;}
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 97 "grammar.l"
-{return T_ML;}
+#line 116 "grammar.l"
+{debug("ML"); return T_ML;}
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 98 "grammar.l"
-{return T_DV;}
+#line 117 "grammar.l"
+{debug("DV"); return T_DV;}
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 99 "grammar.l"
-{return T_OP;}
+#line 118 "grammar.l"
+{ debug("OP"); return T_OP;}
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 100 "grammar.l"
-{return T_CP;}
+#line 119 "grammar.l"
+{debug("CP"); return T_CP;}
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 101 "grammar.l"
-{return T_OB;}
+#line 120 "grammar.l"
+{debug("OB"); return T_OB;}
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 102 "grammar.l"
-{return T_CB;}
+#line 121 "grammar.l"
+{debug("CB"); return T_CB;}
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 103 "grammar.l"
-{return T_Comma;}
+#line 122 "grammar.l"
+{debug("Comma"); return T_Comma;}
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 104 "grammar.l"
-{return T_EQL;}
+#line 123 "grammar.l"
+{debug("EQL"); return T_EQL;}
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 105 "grammar.l"
-{return T_Range;}
+#line 124 "grammar.l"
+{debug("Range"); return T_Range;}
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 106 "grammar.l"
-{return T_List;}
+#line 125 "grammar.l"
+{debug("List"); return T_List;}
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
-#line 107 "grammar.l"
-{yylval.text = strdup(yytext); return T_Number;}
+#line 126 "grammar.l"
+{yylval.text = strdup(yytext); debug("Number"); return T_Number;}
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 108 "grammar.l"
-{yylval.text = strdup(yytext); return T_ID;}
+#line 127 "grammar.l"
+{yylval.text = strdup(yytext); debug(yylval.text); return T_ID;}
 	YY_BREAK
 case 37:
 YY_RULE_SETUP
-#line 109 "grammar.l"
-{yylval.text = strdup(yytext); return T_String;}
+#line 128 "grammar.l"
+{yylval.text = strdup(yytext); debug("String"); return T_String;}
 	YY_BREAK
 case 38:
 YY_RULE_SETUP
-#line 110 "grammar.l"
-{yylval.text = strdup(yytext); return T_String;}
+#line 129 "grammar.l"
+{yylval.text = strdup(yytext); debug("String"); return T_String;}
 	YY_BREAK
 case 39:
 YY_RULE_SETUP
-#line 111 "grammar.l"
+#line 130 "grammar.l"
 {}
 	YY_BREAK
 case 40:
 YY_RULE_SETUP
-#line 112 "grammar.l"
+#line 131 "grammar.l"
 {} 
 	YY_BREAK
 case 41:
 /* rule 41 can match eol */
 YY_RULE_SETUP
-#line 113 "grammar.l"
-{yycolumn=1; return T_NL;}
+#line 132 "grammar.l"
+{yycolumn=1; debug("NL"); return T_NL;}
 	YY_BREAK
 case YY_STATE_EOF(INITIAL):
-#line 114 "grammar.l"
-{return T_EndOfFile;}
+#line 133 "grammar.l"
+{debug("EOF"); return T_EndOfFile;}
 	YY_BREAK
 case 42:
 YY_RULE_SETUP
-#line 116 "grammar.l"
+#line 135 "grammar.l"
 ECHO;
 	YY_BREAK
-#line 1130 "lex.yy.c"
+#line 1148 "lex.yy.c"
 
 	case YY_END_OF_BUFFER:
 		{
@@ -2137,7 +2155,7 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 116 "grammar.l"
+#line 135 "grammar.l"
 
 
 

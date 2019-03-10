@@ -57,7 +57,7 @@ extern int yydebug;
     T_NEQ = 267,
     T_EQ = 268,
     T_GT = 269,
-    LT = 270,
+    T_LT = 270,
     T_EGT = 271,
     T_ELT = 272,
     T_Or = 273,
@@ -102,7 +102,7 @@ extern int yydebug;
 #define T_NEQ 267
 #define T_EQ 268
 #define T_GT 269
-#define LT 270
+#define T_LT 270
 #define T_EGT 271
 #define T_ELT 272
 #define T_Or 273
@@ -138,7 +138,7 @@ extern int yydebug;
 
 union YYSTYPE
 {
-#line 147 "grammar.y" /* yacc.c:1909  */
+#line 150 "grammar.y" /* yacc.c:1909  */
  char *text; int depth; 
 
 #line 145 "y.tab.h" /* yacc.c:1909  */

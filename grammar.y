@@ -63,12 +63,12 @@
 	}
 	
 	
-	int searchRecordInScope(const char* type, const char *name)
+	int searchRecordInScope(const char* type, const char *name, int index)
 	{
 		int i =0;
-		for(i=0; i<symbolTables[sIndex].noOfElems; i++)
+		for(i=0; i<symbolTables[index].noOfElems; i++)
 		{
-			if(strcmp(symbolTables[sIndex].Elements[i].type, type)==0 && (strcmp(symbolTables[sIndex].Elements[i].name, name)))
+			if((strcmp(symbolTables[index].Elements[i].type, type)==0) && (strcmp(symbolTables[index].Elements[i].name, name)==0))
 			{
 				return i;
 			}	
@@ -80,11 +80,13 @@
 	{
 		int i =0;
 		int index = scopeBasedTableSearch(scope);
+		//printf("No Of Elems : %d\n", symbolTables[index].noOfElems);
 		if(index==0)
 		{
 			for(i=0; i<symbolTables[index].noOfElems; i++)
 			{
-				if(strcmp(symbolTables[index].Elements[i].type, type)==0 && (strcmp(symbolTables[index].Elements[i].name, name)))
+				//printf("%d Name: %s\n", i, symbolTables[index].Elements[i].name);
+				if(strcmp(symbolTables[index].Elements[i].type, type)==0 && (strcmp(symbolTables[index].Elements[i].name, name)==0))
 				{
 					symbolTables[index].Elements[i].lastUseLine = lineNo;
 					return;
@@ -108,8 +110,9 @@
 	
 	void insertRecord(const char* type, const char *name, int lineNo, int scope)
 	{ 
-		int recordIndex = searchRecordInScope(type, name);
 		int index = scopeBasedTableSearch(scope);
+		int recordIndex = searchRecordInScope(type, name, index);
+		//printf("rIndex : %d, Name : %s\n", recordIndex, name);
 		if(recordIndex==-1)
 		{
 			
@@ -147,7 +150,7 @@
 %union { char *text; int depth; };
 %locations
    	  
-%token T_EndOfFile T_Number T_True T_False T_ID T_Print T_Cln T_NL T_EQL T_NEQ T_EQ T_GT LT T_EGT T_ELT T_Or T_And T_Not ID ND DD T_String Trip_Quote T_If T_Elif T_While T_Else T_Import T_Break T_Pass T_MN T_PL T_DV T_ML T_OP T_CP T_OB T_CB T_Def T_Comma T_Range T_List
+%token T_EndOfFile T_Number T_True T_False T_ID T_Print T_Cln T_NL T_EQL T_NEQ T_EQ T_GT T_LT T_EGT T_ELT T_Or T_And T_Not ID ND DD T_String Trip_Quote T_If T_Elif T_While T_Else T_Import T_Break T_Pass T_MN T_PL T_DV T_ML T_OP T_CP T_OB T_CB T_Def T_Comma T_Range T_List
 
 %right T_EQL                                          
 %left T_PL T_MN
@@ -157,16 +160,16 @@
 StartDebugger : {init();} StartParse T_EndOfFile {printf("Valid Python Syntax\n"); printSTable(); exit(0);} ;
 constant : T_Number {insertRecord("Constant", $<text>1, @1.first_line, currentScope);}| T_String {insertRecord("Constant", $<text>1, @1.first_line, currentScope);} ;
 term : T_ID {modifyRecordID("Identifier", $<text>1, @1.first_line, currentScope);}| | constant ;
-StartParse : finalStatements ;
+StartParse : finalStatements | basic_stmt T_NL StartParse;
 Expressions :  arith_exp | bool_exp ;
-basic_stmt : pass_stmt | break_stmt | import_stmt | assign_stmt | Expressions | print_stmt;
+basic_stmt : pass_stmt | break_stmt | import_stmt | assign_stmt | Expressions | print_stmt ; 
 arith_exp :  term | arith_exp  T_PL  arith_exp |
 		    arith_exp  T_MN  arith_exp |
 		    arith_exp  T_ML  arith_exp |
      	    	    arith_exp  T_DV  arith_exp | 
 		    T_OP arith_exp T_CP ;
 		    
-ROP : T_GT | LT | T_ELT | T_EGT ;
+ROP : T_GT | T_LT | T_ELT | T_EGT ;
 bool_exp : T_True | T_False | T_OP bool_exp T_CP | arith_exp ROP arith_exp 
 			 | bool_exp T_And bool_exp
 			 | bool_exp T_Or bool_exp

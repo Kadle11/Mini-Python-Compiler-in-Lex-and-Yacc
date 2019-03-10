@@ -2,6 +2,7 @@
 	#include <string.h>
 	#include "y.tab.h"
 	#define stack_size 100
+	//#define DEBUG 1
 	
 	int yycolumn = 1;
 	
@@ -10,6 +11,20 @@
     yycolumn += yyleng;												
     
  	static int sp=0, stack [stack_size];
+ 	
+ 	static void debug(const char *X)
+ 	{
+ 		#ifdef DEBUG
+ 		if(strcmp(X, "NL")==0)
+ 		{
+ 			printf("%s\n", X);
+ 		}
+		else
+		{
+			printf("%s ", X);	
+		}
+ 		#endif
+ 	}
  	static void push (int i) 
  	{
    		if (++sp<stack_size) stack[sp]= i;
@@ -54,6 +69,7 @@ Multiline_comment \'\'\'.+\'\'\'
 			if(depth < top())
 			{
 				while (depth < top()) pop();
+				yylval.depth = depth;
 				//printf("\tDD \n");
 				return DD;
 			}
@@ -61,56 +77,59 @@ Multiline_comment \'\'\'.+\'\'\'
 			if(depth == top())
 			{
 				//printf("\tND \n");
+				yylval.depth = depth;
 				return ND;				
 			}
 			if(depth > top())
 			{
 				push(depth);
 				//printf("\tID \n");
+				yylval.depth = depth;
 				return ID;
 			}
-			yylval.depth = depth;
+			
 		}
-"import" {/*printf("IMPT \n");*/ return T_Import;}
-"print"  {return T_Print;}
-"pass" {return T_Pass;}
-"if" {return T_If;}
-"while" {return T_While;}
-"break" {return T_Break;}
-"and" {return T_And;}
-"or" {return T_Or;}
-"not" {return T_Not;}
-"elif" {return T_Elif;}
-"else" {return T_Else;}
-"def" {return T_Def;}
-":" {return T_Cln;}
-">" {return T_GT;}
-"<" {return LT;}
-">=" {return T_EGT;}
-"<=" {return T_ELT;}
-"==" {return T_EQ;}
-"!=" {return T_NEQ;}
-"True" {return T_True;}
-"False" {return T_False;}
-"+" {return T_PL;}
-"-" {return T_MN;}
-"*" {return T_ML;}
-"/" {return T_DV;}
-"(" {return T_OP;}
-")" {return T_CP;}
-"[" {return T_OB;}
-"]" {return T_CB;}
-"," {return T_Comma;}
-"=" {return T_EQL;}
-"range" {return T_Range;}
-"list" {return T_List;}
-[0-9]+ {yylval.text = strdup(yytext); return T_Number;}
-[_a-zA-Z][_a-zA-Z0-9]* {yylval.text = strdup(yytext); return T_ID;}
-\"([^\"\n])*\" {yylval.text = strdup(yytext); return T_String;}
-\'([^\'\n])*\' {yylval.text = strdup(yytext); return T_String;}
+
+"import" {debug("IMPT"); return T_Import;}
+"print"  {debug("Print"); return T_Print;}
+"pass" {debug("Pass"); return T_Pass;}
+"if" {debug("If"); return T_If;}
+"while" {debug("While"); return T_While;}
+"break" {debug("Break"); return T_Break;}
+"and" {debug("And"); return T_And;}
+"or" {debug("Or"); return T_Or;}
+"not" {debug("Not"); return T_Not;}
+"elif" {debug("Elif"); return T_Elif;}
+"else" {debug("Else"); return T_Else;}
+"def" {debug("Def"); return T_Def;}
+":" {debug("Cln"); return T_Cln;}
+">" {debug("GT"); return T_GT;}
+"<" {debug("LT"); return T_LT;}
+">=" {debug("EGT"); return T_EGT;}
+"<=" {debug("ELT"); return T_ELT;}
+"==" {debug("EQ"); return T_EQ;}
+"!=" {debug("NEQ"); return T_NEQ;}
+"True" {debug("True"); return T_True;}
+"False" {debug("False"); return T_False;}
+"+" {debug("PL"); return T_PL;}
+"-" {debug("MN"); return T_MN;}
+"*" {debug("ML"); return T_ML;}
+"/" {debug("DV"); return T_DV;}
+"(" { debug("OP"); return T_OP;}
+")" {debug("CP"); return T_CP;}
+"[" {debug("OB"); return T_OB;}
+"]" {debug("CB"); return T_CB;}
+"," {debug("Comma"); return T_Comma;}
+"=" {debug("EQL"); return T_EQL;}
+"range" {debug("Range"); return T_Range;}
+"list" {debug("List"); return T_List;}
+[0-9]+ {yylval.text = strdup(yytext); debug("Number"); return T_Number;}
+[_a-zA-Z][_a-zA-Z0-9]* {yylval.text = strdup(yytext); debug(yylval.text); return T_ID;}
+\"([^\"\n])*\" {yylval.text = strdup(yytext); debug("String"); return T_String;}
+\'([^\'\n])*\' {yylval.text = strdup(yytext); debug("String"); return T_String;}
 "#"([a-z]|[0-9]|[A-Z]|" ")* {}
 {whitespace} {} 
-"\n" {yycolumn=1; return T_NL;}
-<<EOF>> {return T_EndOfFile;}
+"\n" {yycolumn=1; debug("NL"); return T_NL;}
+<<EOF>> {debug("EOF"); return T_EndOfFile;}
 
 %%
