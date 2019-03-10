@@ -69,6 +69,7 @@ Multiline_comment \'\'\'.+\'\'\'
 				//printf("\tID \n");
 				return ID;
 			}
+			yylval.depth = depth;
 		}
 "import" {/*printf("IMPT \n");*/ return T_Import;}
 "print"  {return T_Print;}

@@ -1,4 +1,4 @@
-import XYZ
+x=10
 while(x==y):
 	c=0 
 	if(z==b):
