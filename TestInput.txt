@@ -3,13 +3,14 @@
 x=10
 y=10
 x+y
-while(x==y):
-	c=0
-	z=10
-	b=10
-	if(z==b):
-		c=10+b
-	if(x==y):
-		a=10
-	w=21
+def func():
+	while(x==y):
+		c=0
+		z=10
+		b=10
+		if(z==b):
+			c=10+b
+		if(x>y):
+			a=10
+		w=21
 

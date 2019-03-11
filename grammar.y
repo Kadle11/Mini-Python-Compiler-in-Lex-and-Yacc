@@ -4,10 +4,12 @@
 	#include <string.h>
 	
 	extern int yylineno;
+	extern int depth;
+	extern int top();
+	extern int pop();
 	int currentScope = 0, previousScope = 0;
 	
 	int *arrayScope = NULL;
-	
 	
 	typedef struct record
 	{
@@ -44,6 +46,11 @@
 		currentScope = scope;
 	}
 	
+	void resetDepth()
+	{
+		while(top()) pop();
+		depth = 0;
+	}
 	int scopeBasedTableSearch(int scope)
 	{
 		int i = sIndex;
@@ -176,7 +183,7 @@
 StartDebugger : {init();} StartParse T_EndOfFile {printf("\nValid Python Syntax\n"); printSTable(); exit(0);} ;
 constant : T_Number {insertRecord("Constant", $<text>1, @1.first_line, currentScope);}| T_String {insertRecord("Constant", $<text>1, @1.first_line, currentScope);} ;
 term : T_ID {modifyRecordID("Identifier", $<text>1, @1.first_line, currentScope);}| | constant ;
-StartParse : finalStatements T_NL StartParse | finalStatements;
+StartParse : finalStatements T_NL {resetDepth();} StartParse | finalStatements;
 Expressions :  arith_exp | bool_exp ;
 basic_stmt : pass_stmt | break_stmt | import_stmt | assign_stmt | Expressions | print_stmt ; 
 arith_exp :  term | arith_exp  T_PL  arith_exp |
@@ -220,7 +227,7 @@ func_call : T_ID T_OP args_list T_CP ;
 
 void yyerror(const char *msg)
 {
-	printf("Syntax Error at Line %d, Column : %d\n",  yylineno, yylloc.last_column);
+	printf("\nSyntax Error at Line %d, Column : %d\n",  yylineno, yylloc.last_column);
 	exit(0);
 }
 

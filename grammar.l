@@ -2,9 +2,10 @@
 	#include <string.h>
 	#include "y.tab.h"
 	#define stack_size 100
-	//#define DEBUG 1
+	#define DEBUG 1
 	
 	int yycolumn = 1;
+	int startFlag = 1;
 	
 	#define YY_USER_ACTION yylloc.first_line = yylloc.last_line = yylineno; 		\
     yylloc.first_column = yycolumn; yylloc.last_column = yycolumn + yyleng - 1; 	\
@@ -15,6 +16,11 @@
  	static void debug(const char *X)
  	{
  		#ifdef DEBUG
+ 		if(startFlag)
+ 		{
+ 			printf("1 ");
+ 			startFlag=0;
+ 		}
  		if(strcmp(X, "NL")==0)
  		{
  			printf("%s\n%d ", X, yylineno);
@@ -31,13 +37,13 @@
    		else {printf ("error: stack overflow\n"); exit(1);}
  	}
  	
- 	static int pop () 
+ 	int pop () 
  	{
    		if (sp>-1) return stack[sp--];
    		else {printf ("error: stack underflow\n"); exit(1);}
  	}
  	
- 	static int top()
+ 	int top()
  	{
  		if(sp>-1) return stack[sp];
  		else return 0;
