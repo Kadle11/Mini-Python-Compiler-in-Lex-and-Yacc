@@ -1,5 +1,5 @@
 Test.out : lex.yy.c y.tab.c y.tab.h 
-	gcc lex.yy.c y.tab.c -ll -o Test.out
+	gcc lex.yy.c y.tab.c -g -ll -o Test.out
 
 y.tab.c : grammar.y
 	yacc -dv grammar.y

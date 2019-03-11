@@ -99,7 +99,7 @@
 		{
 			for(i=0; i<symbolTables[index].noOfElems; i++)
 			{
-				//printf("%d Name: %s\n", i, symbolTables[index].Elements[i].name);
+				
 				if(strcmp(symbolTables[index].Elements[i].type, type)==0 && (strcmp(symbolTables[index].Elements[i].name, name)==0))
 				{
 					symbolTables[index].Elements[i].lastUseLine = lineNo;
@@ -112,14 +112,15 @@
 		
 		for(i=0; i<symbolTables[index].noOfElems; i++)
 		{
-			if(strcmp(symbolTables[index].Elements[i].type, type)==0 && (strcmp(symbolTables[sIndex].Elements[i].name, name)))
+			//printf("\t%d Name: %s\n", i, symbolTables[index].Elements[i].name);
+			if(strcmp(symbolTables[index].Elements[i].type, type)==0 && (strcmp(symbolTables[index].Elements[i].name, name)==0))
 			{
 				symbolTables[index].Elements[i].lastUseLine = lineNo;
 				return;
 			}	
 		}
-		
-		return modifyRecordID(type, name, symbolTables[index].Parent, lineNo);
+		//printf("Parent : %d\n", symbolTables[index].Parent);
+		return modifyRecordID(type, name, lineNo, symbolTables[symbolTables[index].Parent].scope);
 	}
 	
 	void insertRecord(const char* type, const char *name, int lineNo, int scope)
@@ -151,7 +152,7 @@
 	void printSTable()
 	{
 		int i = 0, j = 0;
-		printf("Scope\tType\tName\t\tDeclaration\tLast Used Line\n");
+		printf("Scope\tName\tType\t\tDeclaration\tLast Used Line\n");
 		for(i=0; i<=sIndex; i++)
 		{
 			for(j=0; j<symbolTables[i].noOfElems; j++)
@@ -172,10 +173,10 @@
 %left T_ML T_DV
 
 %%
-StartDebugger : {init();} StartParse T_EndOfFile {printf("Valid Python Syntax\n"); printSTable(); exit(0);} ;
+StartDebugger : {init();} StartParse T_EndOfFile {printf("\nValid Python Syntax\n"); printSTable(); exit(0);} ;
 constant : T_Number {insertRecord("Constant", $<text>1, @1.first_line, currentScope);}| T_String {insertRecord("Constant", $<text>1, @1.first_line, currentScope);} ;
 term : T_ID {modifyRecordID("Identifier", $<text>1, @1.first_line, currentScope);}| | constant ;
-StartParse : finalStatements | basic_stmt T_NL StartParse;
+StartParse : finalStatements T_NL StartParse | finalStatements;
 Expressions :  arith_exp | bool_exp ;
 basic_stmt : pass_stmt | break_stmt | import_stmt | assign_stmt | Expressions | print_stmt ; 
 arith_exp :  term | arith_exp  T_PL  arith_exp |
@@ -197,7 +198,7 @@ break_stmt : T_Break ;
 assign_stmt : T_ID {insertRecord("Identifier", $<text>1, @1.first_line, currentScope);} T_EQL Expressions | T_ID {insertRecord("Identifier", $<text>1, @1.first_line, currentScope);} T_EQL func_call ;
 print_stmt : T_Print T_OP T_String T_CP ;
 
-finalStatements : basic_stmt | cmpd_stmt | func_def;
+finalStatements : basic_stmt | cmpd_stmt | func_def ;
 
 cmpd_stmt : if_stmt | while_stmt ;
 
@@ -209,7 +210,7 @@ while_stmt : T_While bool_exp T_Cln start_suite;
 
 start_suite : basic_stmt | T_NL ID {initNewTable($<depth>2); updateCScope($<depth>2);} finalStatements suite;
 suite : T_NL ND finalStatements suite | T_NL end_suite;
-end_suite : DD {updateCScope($<depth>1);} finalStatements |{updateCScope($<depth>0);};
+end_suite : DD {updateCScope($<depth>1);} finalStatements |;
 
 args_list : T_ID T_Comma args_list | T_ID | ;
 func_def : T_Def T_ID {insertRecord("Func_Name", $<text>2, @2.first_line, currentScope);} T_OP args_list T_CP T_Cln start_suite;

@@ -2,7 +2,7 @@
 	#include <string.h>
 	#include "y.tab.h"
 	#define stack_size 100
-	#define DEBUG 1
+	//#define DEBUG 1
 	
 	int yycolumn = 1;
 	
@@ -17,7 +17,7 @@
  		#ifdef DEBUG
  		if(strcmp(X, "NL")==0)
  		{
- 			printf("%s\n", X);
+ 			printf("%s\n%d ", X, yylineno);
  		}
 		else
 		{
