@@ -46,12 +46,12 @@
  	int top()
  	{
  		if(sp>-1) return stack[sp];
- 		else return 0;
+ 		else return 1;
  	}
  	
  	static int indent_depth(const char *K)
 	{
-		int len = strlen(K), i, tab_count=0;
+		int len = strlen(K), i, tab_count=1;
 		for(i=0; i< len ; i++)
 		{
 			if(K[i]=='\t')
@@ -61,7 +61,7 @@
 		}
 		return tab_count;
 	}	
- 	int depth = 0;
+ 	int depth = 1;
  		
 %}
 %option yylineno

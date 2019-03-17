@@ -7,7 +7,7 @@
 	extern int depth;
 	extern int top();
 	extern int pop();
-	int currentScope = 0, previousScope = 0;
+	int currentScope = 1, previousScope = 1;
 	
 	int *arrayScope = NULL;
 	
@@ -49,7 +49,7 @@
 	void resetDepth()
 	{
 		while(top()) pop();
-		depth = 0;
+		depth = 10;
 	}
 	int scopeBasedTableSearch(int scope)
 	{
@@ -78,8 +78,8 @@
 	void init()
 	{
 		symbolTables = (STable*)calloc(100, sizeof(STable));
-		arrayScope = (int*)calloc(5, sizeof(int));
-		initNewTable(0);
+		arrayScope = (int*)calloc(10, sizeof(int));
+		initNewTable(1);
 		
 	}
 	
@@ -159,14 +159,31 @@
 	void printSTable()
 	{
 		int i = 0, j = 0;
-		printf("Scope\tName\tType\t\tDeclaration\tLast Used Line\n");
+		
+		printf("----------------------------All Symbol Tables----------------------------");
+		printf("\nScope\tName\tType\t\tDeclaration\tLast Used Line\n");
 		for(i=0; i<=sIndex; i++)
 		{
 			for(j=0; j<symbolTables[i].noOfElems; j++)
 			{
-				printf("%d\t%s\t%s\t%d\t\t%d\n", symbolTables[i].scope, symbolTables[i].Elements[j].name, symbolTables[i].Elements[j].type, symbolTables[i].Elements[j].decLineNo,  symbolTables[i].Elements[j].lastUseLine);
+				printf("(%d, %d)\t%s\t%s\t%d\t\t%d\n", symbolTables[i].Parent, symbolTables[i].scope, symbolTables[i].Elements[j].name, symbolTables[i].Elements[j].type, symbolTables[i].Elements[j].decLineNo,  symbolTables[i].Elements[j].lastUseLine);
 			}
 		}
+	}
+	
+	void freeAll()
+	{
+		int i = 0, j = 0;
+		for(i=0; i<=sIndex; i++)
+		{
+			for(j=0; j<symbolTables[i].noOfElems; j++)
+			{
+				free(symbolTables[i].Elements[j].name);
+				free(symbolTables[i].Elements[j].type);	
+			}
+			free(symbolTables[i].Elements);
+		}
+		free(symbolTables);
 	}
 %}
 
@@ -178,31 +195,37 @@
 %right T_EQL                                          
 %left T_PL T_MN
 %left T_ML T_DV
+%nonassoc T_If
+%nonassoc T_Elif
+%nonassoc T_Else
 
 %%
-StartDebugger : {init();} StartParse T_EndOfFile {printf("\nValid Python Syntax\n"); printSTable(); exit(0);} ;
-constant : T_Number {insertRecord("Constant", $<text>1, @1.first_line, currentScope);}| T_String {insertRecord("Constant", $<text>1, @1.first_line, currentScope);} ;
-term : T_ID {modifyRecordID("Identifier", $<text>1, @1.first_line, currentScope);}| | constant ;
+StartDebugger : {init();} StartParse T_EndOfFile {printf("\nValid Python Syntax\n"); printSTable(); freeAll(); exit(0);} ;
+constant : T_Number {insertRecord("Constant", $<text>1, @1.first_line, currentScope);}| T_String {insertRecord("Constant", $<text>1, @1.first_line, currentScope);};
+term : T_ID {modifyRecordID("Identifier", $<text>1, @1.first_line, currentScope);} | constant;
 StartParse : finalStatements T_NL {resetDepth();} StartParse | finalStatements;
-Expressions :  arith_exp | bool_exp ;
-basic_stmt : pass_stmt | break_stmt | import_stmt | assign_stmt | Expressions | print_stmt ; 
+basic_stmt : pass_stmt | break_stmt | import_stmt | assign_stmt | arith_exp | bool_exp | print_stmt ; 
 arith_exp :  term | arith_exp  T_PL  arith_exp |
 		    arith_exp  T_MN  arith_exp |
 		    arith_exp  T_ML  arith_exp |
      	    	    arith_exp  T_DV  arith_exp | 
 		    T_OP arith_exp T_CP ;
 		    
-ROP : T_GT | T_LT | T_ELT | T_EGT ;
-bool_exp : T_True | T_False | T_OP bool_exp T_CP | arith_exp ROP arith_exp 
+/*bool_exp : T_True | T_False | T_OP bool_exp T_CP | arith_exp T_LT arith_exp | arith_exp T_GT arith_exp | arith_exp T_ELT arith_exp | arith_exp T_EGT arith_exp 
 			 | bool_exp T_And bool_exp
 			 | bool_exp T_Or bool_exp
 			 | T_Not  bool_exp
-			 | Expressions T_EQ Expressions | Expressions T_NEQ Expressions ;
+			 | arith_exp T_EQ arith_exp | arith_exp T_NEQ arith_exp | bool_exp T_EQ bool_exp | bool_exp T_NEQ bool_exp ;
+*/
+
+bool_exp :  T_True | T_False | T_Or bool_term | arith_exp T_LT arith_exp | arith_exp T_GT arith_exp | arith_exp T_ELT arith_exp | arith_exp T_EGT arith_exp ; 
+bool_term : bool_factor | T_And bool_factor;
+bool_factor : term | T_Not bool_factor | T_OP bool_exp T_CP;
 
 import_stmt : T_Import T_ID {insertRecord("Package", $<text>2, @2.first_line, currentScope);};
 pass_stmt : T_Pass ;
 break_stmt : T_Break ;
-assign_stmt : T_ID {insertRecord("Identifier", $<text>1, @1.first_line, currentScope);} T_EQL Expressions | T_ID {insertRecord("Identifier", $<text>1, @1.first_line, currentScope);} T_EQL func_call ;
+assign_stmt : T_ID T_EQL arith_exp {insertRecord("Identifier", $<text>1, @1.first_line, currentScope);} | T_ID T_EQL bool_exp {insertRecord("Identifier", $<text>1, @1.first_line, currentScope);} | T_ID  T_EQL func_call {insertRecord("Identifier", $<text>1, @1.first_line, currentScope);};
 print_stmt : T_Print T_OP T_String T_CP ;
 
 finalStatements : basic_stmt | cmpd_stmt | func_def ;
