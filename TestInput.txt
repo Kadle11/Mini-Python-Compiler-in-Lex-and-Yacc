@@ -1,11 +1,13 @@
+import hWorld
 x=10
 y=10
 x+y
+listX = []
 def func():
-	while(x==y):
+	while(listX[1]==y):
 		c=0
 		z=10
-		b=10
+		b=z
 		if(z==b):
 			c=10+b
 		if(x>y):

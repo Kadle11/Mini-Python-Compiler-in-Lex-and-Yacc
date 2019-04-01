@@ -46,102 +46,104 @@ extern int yydebug;
   enum yytokentype
   {
     T_EndOfFile = 258,
-    T_Number = 259,
-    T_True = 260,
-    T_False = 261,
-    T_ID = 262,
-    T_Print = 263,
-    T_Cln = 264,
-    T_NL = 265,
-    T_EQL = 266,
-    T_NEQ = 267,
-    T_EQ = 268,
-    T_GT = 269,
-    T_LT = 270,
-    T_EGT = 271,
-    T_ELT = 272,
-    T_Or = 273,
-    T_And = 274,
-    T_Not = 275,
-    ID = 276,
-    ND = 277,
-    DD = 278,
-    T_String = 279,
-    Trip_Quote = 280,
-    T_If = 281,
-    T_Elif = 282,
-    T_While = 283,
-    T_Else = 284,
-    T_Import = 285,
-    T_Break = 286,
-    T_Pass = 287,
-    T_MN = 288,
-    T_PL = 289,
-    T_DV = 290,
-    T_ML = 291,
-    T_OP = 292,
-    T_CP = 293,
-    T_OB = 294,
-    T_CB = 295,
-    T_Def = 296,
-    T_Comma = 297,
-    T_Range = 298,
-    T_List = 299
+    T_Return = 259,
+    T_Number = 260,
+    T_True = 261,
+    T_False = 262,
+    T_ID = 263,
+    T_Print = 264,
+    T_Cln = 265,
+    T_NL = 266,
+    T_EQL = 267,
+    T_NEQ = 268,
+    T_EQ = 269,
+    T_GT = 270,
+    T_LT = 271,
+    T_EGT = 272,
+    T_ELT = 273,
+    T_Or = 274,
+    T_And = 275,
+    T_Not = 276,
+    ID = 277,
+    ND = 278,
+    DD = 279,
+    T_String = 280,
+    Trip_Quote = 281,
+    T_If = 282,
+    T_Elif = 283,
+    T_While = 284,
+    T_Else = 285,
+    T_Import = 286,
+    T_Break = 287,
+    T_Pass = 288,
+    T_MN = 289,
+    T_PL = 290,
+    T_DV = 291,
+    T_ML = 292,
+    T_OP = 293,
+    T_CP = 294,
+    T_OB = 295,
+    T_CB = 296,
+    T_Def = 297,
+    T_Comma = 298,
+    T_Range = 299,
+    T_List = 300
   };
 #endif
 /* Tokens.  */
 #define T_EndOfFile 258
-#define T_Number 259
-#define T_True 260
-#define T_False 261
-#define T_ID 262
-#define T_Print 263
-#define T_Cln 264
-#define T_NL 265
-#define T_EQL 266
-#define T_NEQ 267
-#define T_EQ 268
-#define T_GT 269
-#define T_LT 270
-#define T_EGT 271
-#define T_ELT 272
-#define T_Or 273
-#define T_And 274
-#define T_Not 275
-#define ID 276
-#define ND 277
-#define DD 278
-#define T_String 279
-#define Trip_Quote 280
-#define T_If 281
-#define T_Elif 282
-#define T_While 283
-#define T_Else 284
-#define T_Import 285
-#define T_Break 286
-#define T_Pass 287
-#define T_MN 288
-#define T_PL 289
-#define T_DV 290
-#define T_ML 291
-#define T_OP 292
-#define T_CP 293
-#define T_OB 294
-#define T_CB 295
-#define T_Def 296
-#define T_Comma 297
-#define T_Range 298
-#define T_List 299
+#define T_Return 259
+#define T_Number 260
+#define T_True 261
+#define T_False 262
+#define T_ID 263
+#define T_Print 264
+#define T_Cln 265
+#define T_NL 266
+#define T_EQL 267
+#define T_NEQ 268
+#define T_EQ 269
+#define T_GT 270
+#define T_LT 271
+#define T_EGT 272
+#define T_ELT 273
+#define T_Or 274
+#define T_And 275
+#define T_Not 276
+#define ID 277
+#define ND 278
+#define DD 279
+#define T_String 280
+#define Trip_Quote 281
+#define T_If 282
+#define T_Elif 283
+#define T_While 284
+#define T_Else 285
+#define T_Import 286
+#define T_Break 287
+#define T_Pass 288
+#define T_MN 289
+#define T_PL 290
+#define T_DV 291
+#define T_ML 292
+#define T_OP 293
+#define T_CP 294
+#define T_OB 295
+#define T_CB 296
+#define T_Def 297
+#define T_Comma 298
+#define T_Range 299
+#define T_List 300
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 
 union YYSTYPE
 {
-#line 190 "grammar.y" /* yacc.c:1909  */
+#line 258 "grammar.y" /* yacc.c:1909  */
  char *text; int depth; 
 
-#line 145 "y.tab.h" /* yacc.c:1909  */
+#line 147 "y.tab.h" /* yacc.c:1909  */
 };
 
 typedef union YYSTYPE YYSTYPE;

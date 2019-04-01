@@ -108,6 +108,7 @@ Multiline_comment \'\'\'.+\'\'\'
 "elif" {debug("Elif"); return T_Elif;}
 "else" {debug("Else"); return T_Else;}
 "def" {debug("Def"); return T_Def;}
+"return" {debug("Return"); return T_Return;}
 ":" {debug("Cln"); return T_Cln;}
 ">" {debug("GT"); return T_GT;}
 "<" {debug("LT"); return T_LT;}
