@@ -787,14 +787,14 @@ static const yytype_uint8 yytranslate[] =
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_uint16 yyrline[] =
 {
-       0,   268,   268,   268,   269,   269,   270,   270,   270,   271,
-     273,   273,   273,   275,   275,   275,   275,   275,   275,   275,
-     275,   276,   276,   277,   278,   279,   280,   283,   283,   283,
-     283,   283,   283,   284,   284,   284,   284,   284,   285,   285,
-     287,   288,   289,   290,   292,   293,   294,   295,   297,   299,
-     299,   299,   301,   301,   304,   304,   305,   305,   306,   308,
-     310,   310,   310,   311,   311,   312,   312,   312,   314,   314,
-     314,   315,   315,   316
+       0,   272,   272,   272,   273,   273,   274,   274,   274,   275,
+     277,   277,   277,   279,   279,   279,   279,   279,   279,   279,
+     279,   280,   280,   281,   282,   283,   284,   287,   287,   287,
+     287,   287,   287,   288,   288,   288,   288,   288,   289,   289,
+     291,   292,   293,   294,   296,   297,   298,   299,   301,   303,
+     303,   303,   305,   305,   308,   308,   309,   309,   310,   312,
+     314,   314,   314,   315,   315,   316,   316,   316,   318,   318,
+     318,   319,   319,   320
 };
 #endif
 
@@ -1759,91 +1759,91 @@ yyreduce:
   switch (yyn)
     {
         case 2:
-#line 268 "grammar.y" /* yacc.c:1646  */
+#line 272 "grammar.y" /* yacc.c:1646  */
     {init();}
 #line 1765 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 3:
-#line 268 "grammar.y" /* yacc.c:1646  */
+#line 272 "grammar.y" /* yacc.c:1646  */
     {printf("\nValid Python Syntax\n"); printSTable(); freeAll(); exit(0);}
 #line 1771 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 4:
-#line 269 "grammar.y" /* yacc.c:1646  */
+#line 273 "grammar.y" /* yacc.c:1646  */
     {insertRecord("Constant", (yyvsp[0].text), (yylsp[0]).first_line, currentScope);}
 #line 1777 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 5:
-#line 269 "grammar.y" /* yacc.c:1646  */
+#line 273 "grammar.y" /* yacc.c:1646  */
     {insertRecord("Constant", (yyvsp[0].text), (yylsp[0]).first_line, currentScope);}
 #line 1783 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 6:
-#line 270 "grammar.y" /* yacc.c:1646  */
+#line 274 "grammar.y" /* yacc.c:1646  */
     {modifyRecordID("Identifier", (yyvsp[0].text), (yylsp[0]).first_line, currentScope);}
 #line 1789 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 9:
-#line 271 "grammar.y" /* yacc.c:1646  */
+#line 275 "grammar.y" /* yacc.c:1646  */
     {checkList((yyvsp[-3].text), (yylsp[-3]).first_line, currentScope);}
 #line 1795 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 10:
-#line 273 "grammar.y" /* yacc.c:1646  */
+#line 277 "grammar.y" /* yacc.c:1646  */
     {resetDepth();}
 #line 1801 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 40:
-#line 287 "grammar.y" /* yacc.c:1646  */
+#line 291 "grammar.y" /* yacc.c:1646  */
     {insertRecord("PackageName", (yyvsp[0].text), (yylsp[0]).first_line, currentScope);}
 #line 1807 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 44:
-#line 292 "grammar.y" /* yacc.c:1646  */
+#line 296 "grammar.y" /* yacc.c:1646  */
     {insertRecord("Identifier", (yyvsp[-2].text), (yylsp[-2]).first_line, currentScope);}
 #line 1813 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 45:
-#line 293 "grammar.y" /* yacc.c:1646  */
+#line 297 "grammar.y" /* yacc.c:1646  */
     {insertRecord("Identifier", (yyvsp[-2].text), (yylsp[-2]).first_line, currentScope);}
 #line 1819 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 46:
-#line 294 "grammar.y" /* yacc.c:1646  */
+#line 298 "grammar.y" /* yacc.c:1646  */
     {insertRecord("Identifier", (yyvsp[-2].text), (yylsp[-2]).first_line, currentScope);}
 #line 1825 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 47:
-#line 295 "grammar.y" /* yacc.c:1646  */
+#line 299 "grammar.y" /* yacc.c:1646  */
     {insertRecord("ListTypeID", (yyvsp[-3].text), (yylsp[-3]).first_line, currentScope);}
 #line 1831 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 61:
-#line 310 "grammar.y" /* yacc.c:1646  */
+#line 314 "grammar.y" /* yacc.c:1646  */
     {initNewTable((yyvsp[0].depth)); updateCScope((yyvsp[0].depth));}
 #line 1837 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 65:
-#line 312 "grammar.y" /* yacc.c:1646  */
+#line 316 "grammar.y" /* yacc.c:1646  */
     {updateCScope((yyvsp[0].depth));}
 #line 1843 "y.tab.c" /* yacc.c:1646  */
     break;
 
   case 71:
-#line 315 "grammar.y" /* yacc.c:1646  */
+#line 319 "grammar.y" /* yacc.c:1646  */
     {insertRecord("Func_Name", (yyvsp[0].text), (yylsp[0]).first_line, currentScope);}
 #line 1849 "y.tab.c" /* yacc.c:1646  */
     break;
@@ -2084,7 +2084,7 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 318 "grammar.y" /* yacc.c:1906  */
+#line 322 "grammar.y" /* yacc.c:1906  */
 
 
 void yyerror(const char *msg)

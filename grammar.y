@@ -31,12 +31,26 @@
 	
 	typedef struct ASTNode
 	{
-		struct ASTNode *left;
-		struct ASTNode *right;
-		char *token;	
+    /*Operator*/
+    char *NType;
+    int noOps;
+    struct ASTNode NextLevel;
+    
+    /*Identifier or Const*/
+    record *id;
+	
 	} node;
   
   
+  node *createID_Const(char *value, char *type, int scope)
+  {
+    node *newNode;
+    if(!strcmp("Constant", type))
+    {
+      newNode = (node*)calloc(sizeof(node));
+      newNode
+    }
+  }
 
 	STable *symbolTables = NULL;
 	int sIndex = -1;
@@ -84,6 +98,7 @@
 		}
 		return -1;
 	}
+	
 	void initNewTable(int scope)
 	{
 		arrayScope[scope]++;
@@ -103,8 +118,7 @@
 		initNewTable(1);
 		
 	}
-	
-	
+
 	int searchRecordInScope(const char* type, const char *name, int index)
 	{
 		int i =0;
@@ -122,7 +136,6 @@
 	{
 		int i =0;
 		int index = scopeBasedTableSearch(scope);
-		//printf("No Of Elems : %d\n", symbolTables[index].noOfElems);
 		if(index==0)
 		{
 			for(i=0; i<symbolTables[index].noOfElems; i++)
@@ -140,14 +153,12 @@
 		
 		for(i=0; i<symbolTables[index].noOfElems; i++)
 		{
-			//printf("\t%d Name: %s\n", i, symbolTables[index].Elements[i].name);
 			if(strcmp(symbolTables[index].Elements[i].type, type)==0 && (strcmp(symbolTables[index].Elements[i].name, name)==0))
 			{
 				symbolTables[index].Elements[i].lastUseLine = lineNo;
 				return;
 			}	
 		}
-		//printf("Parent : %d\n", symbolTables[index].Parent);
 		return modifyRecordID(type, name, lineNo, symbolTables[symbolTables[index].Parent].scope);
 	}
 	
@@ -156,7 +167,6 @@
 		int FScope = power(scope, arrayScope[scope]);
 		int index = scopeBasedTableSearch(FScope);
 		int recordIndex = searchRecordInScope(type, name, index);
-		//printf("rIndex : %d, Name : %s\n", recordIndex, name);
 		if(recordIndex==-1)
 		{
 			
@@ -224,6 +234,9 @@
 
 	}
 	
+	record *findRecord()
+	{
+	}
 	void printSTable()
 	{
 		int i = 0, j = 0;
@@ -263,6 +276,10 @@
 %right T_EQL                                          
 %left T_PL T_MN
 %left T_ML T_DV
+%nonassoc T_If
+%nonassoc T_Elif
+%nonassoc T_Else
+
 
 %%
 StartDebugger : {init();} StartParse T_EndOfFile {printf("\nValid Python Syntax\n"); printSTable(); freeAll(); exit(0);} ;
