@@ -76,7 +76,7 @@
     node *newNode;
     newNode = (node*)calloc(1, sizeof(node));
     newNode->NType = NULL;
-    newNode->noOps = 0;
+    newNode->noOps = -1;
     newNode->id = findRecord(value, type, scope);
     return newNode;
   }
@@ -325,6 +325,8 @@
 				printf("(%d, %d)\t%s\t%s\t%d\t\t%d\n", symbolTables[i].Parent, symbolTables[i].scope, symbolTables[i].Elements[j].name, symbolTables[i].Elements[j].type, symbolTables[i].Elements[j].decLineNo,  symbolTables[i].Elements[j].lastUseLine);
 			}
 		}
+		
+		printf("-------------------------------------------------------------------------");
 	}
 	
 	void printAST(node *root)
@@ -334,7 +336,7 @@
 	    return;
 	  }
 	  
-	  if(root->noOps >= 1)
+	  if(root->noOps >= 0)
 	  {
 	    int i;
 	    for(i = 0; i < tabCount; i++)
@@ -352,9 +354,15 @@
 	    tabCount--;
 	  }
 	  
-	  if(root->noOps == 0)
+	  if(root->noOps == -1)
 	  {
-	    printf("%s", root->id->name);
+	    int i = 0;
+	    for(i = 0; i < tabCount; i++)
+	    {
+	      printf("  ");
+	    }
+	    
+	    printf("%s ", root->id->name);
 	  }	  
 	}
 	
@@ -390,7 +398,7 @@
 
 %%
 
-StartDebugger : {init();} StartParse T_EndOfFile {printf("\nValid Python Syntax\n"); printSTable(); freeAll(); exit(0);} ;
+StartDebugger : {init();} StartParse T_EndOfFile {printf("\nValid Python Syntax\n"); printSTable(); printAST($2); freeAll(); exit(0);} ;
 
 constant : T_Number {insertRecord("Constant", $<text>1, @1.first_line, currentScope); $$ = createID_Const("Constant", $<text>1, currentScope);}
          | T_String {insertRecord("Constant", $<text>1, @1.first_line, currentScope); $$ = createID_Const("Constant", $<text>1, currentScope);};
@@ -399,7 +407,7 @@ term : T_ID {modifyRecordID("Identifier", $<text>1, @1.first_line, currentScope)
      | constant | list_index;
 
 
-list_index : T_ID T_OB constant T_CB {checkList($<text>1, @1.first_line, currentScope); $$ = createOp("ListTypeID", 2, createID_Const("Identifier", $<text>1, currentScope), $3);};
+list_index : T_ID T_OB constant T_CB {checkList($<text>1, @1.first_line, currentScope); $$ = createOp("ListIndex", 1, $3);};
 
 StartParse : finalStatements T_NL {resetDepth();} StartParse {$$ = createOp("NewScope", 2, $1, $4);}| finalStatements {$$=$1;};
 

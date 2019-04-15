@@ -10,8 +10,6 @@ def func():
 		b=z
 		if(z==b):
 			c=10+b
-		if(x>y):
-			a=10
 		w=21
 	z=12
 
