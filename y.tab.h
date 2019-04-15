@@ -140,8 +140,8 @@ extern int yydebug;
 
 union YYSTYPE
 {
-#line 258 "grammar.y" /* yacc.c:1909  */
- char *text; int depth; 
+#line 377 "grammar.y" /* yacc.c:1909  */
+ char *text; int depth; struct ASTNode* node;
 
 #line 147 "y.tab.h" /* yacc.c:1909  */
 };
