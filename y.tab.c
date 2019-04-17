@@ -2129,7 +2129,7 @@ yyreduce:
 
   case 44:
 #line 452 "grammar.y" /* yacc.c:1646  */
-    {insertRecord("Identifier", (yyvsp[-2].text), (yylsp[-2]).first_line, currentScope); (yyval.node) = createOp("=", 2, createID_Const("Identifier", (yyvsp[-2].text), currentScope), (yyvsp[0].node));}
+    { printf("Arithmatic Assign "); insertRecord("Identifier", (yyvsp[-2].text), (yylsp[-2]).first_line, currentScope); (yyval.node) = createOp("=", 2, createID_Const("Identifier", (yyvsp[-2].text), currentScope), (yyvsp[0].node));}
 #line 2134 "y.tab.c" /* yacc.c:1646  */
     break;
 
