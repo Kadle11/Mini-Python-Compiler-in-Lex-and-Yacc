@@ -1,12 +1,17 @@
 import hWorld
 x=10
 y=10
-z = x+y
-y = 2*z
-while(x==10):
-	c=x+y
-	if(c==z):
-		z=0
-	v=10
+x+y
+def F1(A, B):
+	while(x==y):
+		c=0
+		z=10
+		b=z
+		if(z==b):
+			c=10+b
+		w=21
+	
 
-z=10
+if(x==y):
+	x=10
+

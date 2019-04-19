@@ -2,7 +2,7 @@
 	#include <stdio.h>
 	#include <stdlib.h>
 	#include <string.h>
-	#include<stdarg.h>
+	#include <stdarg.h>
 
 	
 	extern int yylineno;
@@ -212,7 +212,57 @@
 		{
 			codeGenOp(opNode->NextLevel[1]);
 			printf("%s = T%d\n", opNode->NextLevel[0]->id->name, opNode->NextLevel[1]->nodeNo);
+			return;
 		}
+		
+		if(!strcmp(opNode->NType, "Func_Name"))
+		{
+			printf("Begin Function %s\n", opNode->NextLevel[0]->id->name);
+			codeGenOp(opNode->NextLevel[2]);
+			printf("End Function %s\n", opNode->NextLevel[0]->id->name);
+			return;
+		}
+		
+		if(!strcmp(opNode->NType, "Func_Call"))
+		{
+			if(!strcmp(opNode->NextLevel[2]->NType, "Void"))
+			{
+				printf("Call Function %s", opNode->NextLevel[0]->id->name);
+			}
+			else
+			{
+				char* token = strtok(opNode->NextLevel[1]->NType, " "); 
+  			int i = 0;
+				while (token != NULL) 
+				{
+						i++; 
+				    printf("Push Param %s\n", token); 
+				    token = strtok(NULL, " "); 
+				}
+				
+				printf("Call Function %s, %d", opNode->NextLevel[0]->id->name, i);
+				return;
+			}
+		}
+		
+		if(opNode->noOps == 0)
+		{
+			if(!strcmp(opNode->NType, "break"))
+			{
+				printf("goto L%d\n", lIndex);
+			}
+
+			if(!strcmp(opNode->NType, "pass"))
+			{
+				;
+			}
+
+			if(!strcmp(opNode->NType, "return"))
+			{
+				printf("return\n");
+			}
+		}
+		
 		
 	}
 	
@@ -407,7 +457,7 @@
 				}
 
 			}
-			printf("Identifier '%s' at line %d Not Declared as an Indexable Type\n", name, yylineno);
+			printf("Identifier '%s' at line %d Not Indexable\n", name, yylineno);
 			exit(1);
 		}
 		
@@ -435,6 +485,7 @@
 	{
 		int i =0;
 		int index = scopeBasedTableSearch(scope);
+		printf("FR: %d, %s\n", scope, name);
 		if(index==0)
 		{
 			for(i=0; i<symbolTables[index].noOfElems; i++)
@@ -636,14 +687,14 @@ end_suite : DD {updateCScope($<depth>1);} finalStatements {$$ = createOp("EndBlo
           | DD {updateCScope($<depth>1);} {$$ = createOp("EndBlock", 0);}
           | {$$ = createOp("EndBlock", 0);};
 
-args : T_ID  args_list {addToList($<text>1); $$ = createOp("Arguments", 1, argsList); clearArgsList();} 
+args : T_ID  args_list {addToList($<text>1); $$ = createOp(argsList, 0); clearArgsList();} 
      | {$$ = createOp("Void", 0);};
 
 args_list : T_Comma T_ID {addToList($<text>1);} | ;
 
-func_def : T_Def T_ID {insertRecord("Func_Name", $<text>2, @2.first_line, currentScope);} T_OP args T_CP T_Cln start_suite {$$ = createOp($<text>2, 2, $5, $8);};
+func_def : T_Def T_ID {insertRecord("Func_Name", $<text>2, @2.first_line, currentScope);} T_OP args T_CP T_Cln start_suite {$$ = createOp("Func_Name", 3, createID_Const("Func_Name", $<text>2, currentScope), $5, $8);};
 
-func_call : T_ID T_OP args T_CP {$$ = createOp($<text>1, 1, $3);};
+func_call : T_ID T_OP args T_CP {$$ = createOp("Func_Call", 2, createID_Const("Func_Name", $<text>1, currentScope), $3);};
  
 %%
 
