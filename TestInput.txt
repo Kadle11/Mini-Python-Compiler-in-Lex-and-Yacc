@@ -1,4 +1,6 @@
+#Hmm
 import hWorld
+#Hmm
 x=10
 y=10
 x+y
@@ -10,8 +12,6 @@ def func():
 		b=z
 		if(z==b):
 			c=10+b
-		if(x==y):
-			a=10
 		w=21
 	z=12
 

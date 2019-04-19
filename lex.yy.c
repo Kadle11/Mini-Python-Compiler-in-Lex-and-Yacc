@@ -562,7 +562,7 @@ char *yytext;
 	#include <string.h>
 	#include "y.tab.h"
 	#define stack_size 100
-	#define DEBUG 1
+	//#define DEBUG 1
 	
 	int yycolumn = 1;
 	int startFlag = 1;

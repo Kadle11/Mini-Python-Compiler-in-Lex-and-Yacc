@@ -1,14 +1,15 @@
 %{
+
 	#include <stdio.h>
 	#include <stdlib.h>
 	#include <string.h>
 	#include<stdarg.h>
 
-	
 	extern int yylineno;
 	extern int depth;
 	extern int top();
 	extern int pop();
+	
 	int currentScope = 1, previousScope = 1;
 	
 	int *arrayScope = NULL;
@@ -43,12 +44,19 @@
 	
 	} node;
   
-  
+  typedef struct Quad
+  {
+  	char *Result;
+  	char *A1;
+  	char *A2;
+  	char *Oper;
+  } Quad;
 
 	STable *symbolTables = NULL;
-	int sIndex = -1, aIndex = -1, tabCount = 0;
+	int sIndex = -1, aIndex = -1, tabCount = 0, tIndex=0, lIndex=0;
 	node *rootNode;
 	char *argsList = NULL;
+	char *tVar, *nVar; 
 	
 	/*-----------------------------Declarations----------------------------------*/
 	
@@ -71,6 +79,19 @@
 	
 	/*------------------------------------------------------------------------------*/
 	
+  void codeGenOp(node *opNode)
+  {
+  	if(!strcmp(opNode->NType, "If")
+  	{
+  	
+  	}
+	}
+	
+	void codeGenValue(char *type, char *value)
+	{
+		
+	}
+	 
   node *createID_Const(char *type, char *value, int scope)
   {
     node *newNode;
@@ -156,7 +177,8 @@
 		symbolTables[sIndex].noOfElems = 0;		
 		symbolTables[sIndex].Elements = (record*)calloc(20, sizeof(record));
 		
-		symbolTables[sIndex].Parent = scopeBasedTableSearch(currentScope); 
+		symbolTables[sIndex].Parent = scopeBasedTableSearch(currentScope);
+		
 	}
 	
 	void init()
@@ -166,6 +188,9 @@
 		initNewTable(1);
 		argsList = (char *)malloc(100);
 		strcpy(argsList, "");
+		tVar = (char*)calloc(5, sizeof(char);
+		tVar = (char*)calloc(5, sizeof(char);
+		strcpy(tVar, "T");
 		
 	}
 
@@ -326,7 +351,7 @@
 			}
 		}
 		
-		printf("-------------------------------------------------------------------------");
+		printf("-------------------------------------------------------------------------\n");
 	}
 	
 	void printAST(node *root)
@@ -376,13 +401,16 @@
 				free(symbolTables[i].Elements[j].name);
 				free(symbolTables[i].Elements[j].type);	
 			}
+
 			free(symbolTables[i].Elements);
 		}
+
 		free(symbolTables);
 	}
+	
 %}
 
-%union { char *text; int depth; struct ASTNode* node;};
+%union {char *text; int depth; struct ASTNode* node;};
 %locations
    	  
 %token T_EndOfFile T_Return T_Number T_True T_False T_ID T_Print T_Cln T_NL T_EQL T_NEQ T_EQ T_GT T_LT T_EGT T_ELT T_Or T_And T_Not ID ND DD T_String Trip_Quote T_If T_Elif T_While T_Else T_Import T_Break T_Pass T_MN T_PL T_DV T_ML T_OP T_CP T_OB T_CB T_Def T_Comma T_Range T_List
@@ -409,7 +437,7 @@ term : T_ID {modifyRecordID("Identifier", $<text>1, @1.first_line, currentScope)
 
 list_index : T_ID T_OB constant T_CB {checkList($<text>1, @1.first_line, currentScope); $$ = createOp("ListIndex", 1, $3);};
 
-StartParse : finalStatements T_NL {resetDepth();} StartParse {$$ = createOp("NewScope", 2, $1, $4);}| finalStatements {$$=$1;};
+StartParse : T_NL StartParse {$$ = $2;}| finalStatements T_NL {resetDepth();} StartParse {$$ = createOp("NewScope", 2, $1, $4);}| finalStatements {$$=$1;};
 
 basic_stmt : pass_stmt {$$=$1;}
            | break_stmt {$$=$1;}
@@ -418,7 +446,7 @@ basic_stmt : pass_stmt {$$=$1;}
            | arith_exp {$$=$1;}
            | bool_exp {$$=$1;}
            | print_stmt {$$=$1;}
-           | return_stmt {$$=$1;} ; 
+           | return_stmt {$$=$1;}; 
 
 arith_exp : term {$$=$1;}
           | arith_exp  T_PL  arith_exp {$$ = createOp("+", 2, $1, $3);}
@@ -449,8 +477,8 @@ pass_stmt : T_Pass {$$ = createOp("pass", 0);};
 break_stmt : T_Break {$$ = createOp("break", 0);};
 return_stmt : T_Return {$$ = createOp("return", 0);};;
 
-assign_stmt : T_ID T_EQL arith_exp { printf("Arithmatic Assign "); insertRecord("Identifier", $<text>1, @1.first_line, currentScope); $$ = createOp("=", 2, createID_Const("Identifier", $<text>1, currentScope), $3);}  
-            | T_ID T_EQL bool_exp {insertRecord("Identifier", $<text>1, @1.first_line, currentScope);$$ = createOp("=", 2, createID_Const("Identifier", $<text>1, currentScope), $3);}   
+assign_stmt : T_ID T_EQL arith_exp {insertRecord("Identifier", $<text>1, @1.first_line, currentScope); $$ = createOp("=", 2, createID_Const("Identifier", $<text>1, currentScope), $3);}  
+            | T_ID T_EQL bool_exp {insertRecord("Identifier", $<text>1, @1.first_line, currentScope); $$ = createOp("=", 2, createID_Const("Identifier", $<text>1, currentScope), $3);}   
             | T_ID  T_EQL func_call {insertRecord("Identifier", $<text>1, @1.first_line, currentScope); $$ = createOp("=", 2, createID_Const("Identifier", $<text>1, currentScope), $3);} 
             | T_ID T_EQL T_OB T_CB {insertRecord("ListTypeID", $<text>1, @1.first_line, currentScope); $$ = createID_Const("ListTypeID", $<text>1, currentScope);} ;
 	      
@@ -467,20 +495,20 @@ cmpd_stmt : if_stmt {$$ = $1;}
 if_stmt : T_If bool_exp T_Cln start_suite {$$ = createOp("If", 2, $2, $4);}
         | T_If bool_exp T_Cln start_suite elif_stmts {$$ = createOp("If", 3, $2, $4, $5);};
 
-elif_stmts : else_stmt {$$= $1;}
-           | T_Elif bool_exp T_Cln start_suite elif_stmts {$$= createOp("Elif", 3, $2, $4, $5);};
+elif_stmts : else_stmt {$$ = $1;}
+           | T_Elif bool_exp T_Cln start_suite elif_stmts {$$ = createOp("Elif", 3, $2, $4, $5);};
 
 else_stmt : T_Else T_Cln start_suite {$$ = createOp("Else", 1, $3);};
 
 while_stmt : T_While bool_exp T_Cln start_suite {$$ = createOp("While", 2, $2, $4);}; 
 
 start_suite : basic_stmt {$$ = $1;}
-            | T_NL ID {initNewTable($<depth>2); updateCScope($<depth>2);} finalStatements suite {$$ = createOp("BeginBlock", 2, $4, $5);};
+            | T_NL ID {initNewTable($<depth>2+1); updateCScope($<depth>2+1);} finalStatements suite {$$ = createOp("BeginBlock", 2, $4, $5);};
 
 suite : T_NL ND finalStatements suite {$$ = createOp("Next", 2, $3, $4);}
       | T_NL end_suite {$$ = $2;};
 
-end_suite : DD {updateCScope($<depth>1);} finalStatements {$$ = createOp("EndBlock", 1, $3);} 
+end_suite : DD {updateCScope($<depth>1+1);} finalStatements {$$ = createOp("EndBlock", 1, $3);} 
           | {$$ = createOp("EndBlock", 0);};
 
 args : T_ID  args_list {addToList($<text>1); $$ = createOp("Arguments", 1, argsList); clearArgsList();} 
@@ -502,7 +530,6 @@ void yyerror(const char *msg)
 
 int main()
 {
-	//printf("Enter the Expression\n");
 	yyparse();
 	return 0;
 }
