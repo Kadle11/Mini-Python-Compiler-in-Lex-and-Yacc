@@ -57,6 +57,11 @@
 			if(K[i]=='\t')
 			{
 				tab_count++;
+			}
+			else
+			{
+				printf("Nope");
+				break;
 			}	
 		}
 		return tab_count;
@@ -71,7 +76,7 @@ Multiline_comment \'\'\'.+\'\'\'
 
 [\t]*		{
 			depth = indent_depth(yytext);
-			//printf("Depth : %d ",  depth);
+//			printf("Depth : %d ",  depth);
 			if(depth < top())
 			{
 				while (depth < top()) pop();
@@ -100,6 +105,7 @@ Multiline_comment \'\'\'.+\'\'\'
 "print"  {debug("Print"); return T_Print;}
 "pass" {debug("Pass"); return T_Pass;}
 "if" {debug("If"); return T_If;}
+"in" {debug("In"); return T_In;}
 "while" {debug("While"); return T_While;}
 "break" {debug("Break"); return T_Break;}
 "and" {debug("And"); return T_And;}
@@ -130,10 +136,10 @@ Multiline_comment \'\'\'.+\'\'\'
 "=" {debug("EQL"); return T_EQL;}
 "range" {debug("Range"); return T_Range;}
 "list" {debug("List"); return T_List;}
-[0-9]+ {yylval.text = strdup(yytext); debug("Number"); return T_Number;}
+[0-9]+ {yylval.text = strdup(yytext); debug(yylval.text); return T_Number;}
 [_a-zA-Z][_a-zA-Z0-9]* {yylval.text = strdup(yytext); debug(yylval.text); return T_ID;}
-\"([^\"\n])*\" {yylval.text = strdup(yytext); debug("String"); return T_String;}
-\'([^\'\n])*\' {yylval.text = strdup(yytext); debug("String"); return T_String;}
+\"([^\"\n])*\" {yylval.text = strdup(yytext); debug(yylval.text); return T_String;}
+\'([^\'\n])*\' {yylval.text = strdup(yytext); debug(yylval.text); return T_String;}
 "#"([a-z]|[0-9]|[A-Z]|" ")* {}
 {whitespace} {} 
 "\n" {yycolumn=1; debug("NL"); return T_NL;}

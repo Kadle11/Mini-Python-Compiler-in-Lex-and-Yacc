@@ -33,6 +33,7 @@
 	
 	typedef struct ASTNode
 	{
+		int nodeNo;
     /*Operator*/
     char *NType;
     int noOps;
@@ -43,12 +44,12 @@
 	
 	} node;
   
-  
 
 	STable *symbolTables = NULL;
-	int sIndex = -1, aIndex = -1, tabCount = 0;
+	int sIndex = -1, aIndex = -1, tabCount = 0, tIndex = 0 , lIndex = 0, nodeCount = 0;
 	node *rootNode;
 	char *argsList = NULL;
+	char *tString = NULL, *lString = NULL;
 	
 	/*-----------------------------Declarations----------------------------------*/
 	
@@ -71,6 +72,150 @@
 	
 	/*------------------------------------------------------------------------------*/
 	
+	int checkIfBinOperator(char *Op)
+	{
+		if((!strcmp(Op, "+")) || (!strcmp(Op, "*")) || (!strcmp(Op, "-")) || (!strcmp(Op, "/")) || (!strcmp(Op, ">=")) || (!strcmp(Op, "<=")) || (!strcmp(Op, "<")) || (!strcmp(Op, ">")) || 
+			 (!strcmp(Op, "in")) || (!strcmp(Op, "==")) || (!strcmp(Op, "and")) || (!strcmp(Op, "or")))
+			{
+				return 1;
+			}
+			
+			else
+			{
+				return 0;
+			}
+	}
+	
+	void codeGenOp(node *opNode)
+	{
+		if(opNode == NULL)
+		{
+			return;
+		}
+		
+		if(opNode->NType == NULL)
+		{
+			if((!strcmp(opNode->id->type, "Identifier")) || (!strcmp(opNode->id->type, "Constant")))
+			{
+				printf("T%d = %s\n", opNode->nodeNo, opNode->id->name);
+			}
+			return;
+		}
+		
+		if((!strcmp(opNode->NType, "If")) || (!strcmp(opNode->NType, "Elif")))
+		{			
+			switch(opNode->noOps)
+			{
+				case 2 : 
+				{
+					int temp = lIndex;
+					codeGenOp(opNode->NextLevel[0]);
+					printf("If False T%d goto L%d\n", opNode->NextLevel[0]->nodeNo, lIndex);
+					lIndex++;
+					codeGenOp(opNode->NextLevel[1]);
+					lIndex--;
+					printf("L%d: ", temp);
+					break;
+				}
+				case 3 : 
+				{
+					codeGenOp(opNode->NextLevel[0]);
+					printf("If False T%d goto L%d\n", opNode->NextLevel[0]->nodeNo, lIndex);
+					codeGenOp(opNode->NextLevel[1]);
+					printf("L%d: ", lIndex);
+					codeGenOp(opNode->NextLevel[2]);
+					lIndex++;
+					break;
+				}
+			}
+			return;
+		}
+		
+		if(!strcmp(opNode->NType, "Else"))
+		{
+			codeGenOp(opNode->NextLevel[0]);
+			return;
+		}
+		
+		if(!strcmp(opNode->NType, "While"))
+		{
+			int temp = lIndex;
+			codeGenOp(opNode->NextLevel[0]);
+			printf("L%d: If False T%d goto L%d\n", lIndex, opNode->NextLevel[0]->nodeNo, lIndex+1);
+			lIndex+=2;			
+			codeGenOp(opNode->NextLevel[1]);
+			printf("goto L%d\n", temp);
+			printf("L%d: ", temp+1); 
+			lIndex = lIndex+2;
+			return;
+		}
+		
+		if(!strcmp(opNode->NType, "Next"))
+		{
+			codeGenOp(opNode->NextLevel[0]);
+			codeGenOp(opNode->NextLevel[1]);
+			return;
+		}
+		
+		if(!strcmp(opNode->NType, "BeginBlock"))
+		{
+			codeGenOp(opNode->NextLevel[0]);
+			codeGenOp(opNode->NextLevel[1]);		
+			return;	
+		}
+		
+		if(!strcmp(opNode->NType, "EndBlock"))
+		{
+			switch(opNode->noOps)
+			{
+				case 0 : 
+				{
+					break;
+				}
+				case 1 : 
+				{
+					codeGenOp(opNode->NextLevel[0]);
+					break;
+				}
+			}
+			return;
+		}
+		
+		if(!strcmp(opNode->NType, "ListIndex"))
+		{
+			printf("T%d = %s[%s]", opNode->nodeNo, opNode->NextLevel[0]->id->name, opNode->NextLevel[1]->id->name);
+			return;
+		}
+		
+		if(checkIfBinOperator(opNode->NType)==1)
+		{
+			codeGenOp(opNode->NextLevel[0]);
+			codeGenOp(opNode->NextLevel[1]);
+			printf("T%d = T%d %s T%d\n", opNode->nodeNo, opNode->NextLevel[0]->nodeNo, opNode->NType, opNode->NextLevel[1]->nodeNo);
+			return;
+		}
+		
+		if(!strcmp(opNode->NType, "import"))
+		{
+			printf("import %s\n", opNode->NextLevel[0]->id->name);
+			return;
+		}
+		
+		if(!strcmp(opNode->NType, "NewScope"))
+		{
+			codeGenOp(opNode->NextLevel[0]);
+			codeGenOp(opNode->NextLevel[1]);
+			return;
+		}
+		
+		if(!strcmp(opNode->NType, "="))
+		{
+			codeGenOp(opNode->NextLevel[1]);
+			printf("%s = T%d\n", opNode->NextLevel[0]->id->name, opNode->NextLevel[1]->nodeNo);
+		}
+		
+	}
+	
   node *createID_Const(char *type, char *value, int scope)
   {
     node *newNode;
@@ -78,11 +223,13 @@
     newNode->NType = NULL;
     newNode->noOps = -1;
     newNode->id = findRecord(value, type, scope);
+    newNode->nodeNo = nodeCount++;
     return newNode;
   }
 
   node *createOp(char *oper, int noOps, ...)
   {
+  
     va_list params;
     node *newNode;
     int i;
@@ -99,6 +246,7 @@
       newNode->NextLevel[i] = va_arg(params, node*);
     
     va_end(params);
+    newNode->nodeNo = nodeCount++;
     return newNode;
   }
   
@@ -166,7 +314,6 @@
 		initNewTable(1);
 		argsList = (char *)malloc(100);
 		strcpy(argsList, "");
-		
 	}
 
 	int searchRecordInScope(const char* type, const char *name, int index)
@@ -298,7 +445,7 @@
 					return &(symbolTables[index].Elements[i]);
 				}	
 			}
-			printf("Identifier '%s' at line %d Not Declared\n", name, yylineno);
+			printf("\nIdentifier '%s' at line %d Not Found in Symbol Table\n", name, yylineno);
 			exit(1);
 		}
 		
@@ -326,7 +473,8 @@
 			}
 		}
 		
-		printf("-------------------------------------------------------------------------");
+		printf("-------------------------------------------------------------------------\n");
+		
 	}
 	
 	void printAST(node *root)
@@ -341,7 +489,7 @@
 	    int i;
 	    for(i = 0; i < tabCount; i++)
 	    {
-	      printf("  ");
+	      //printf("  ");
 	    }
 	    
 	    printf("%s\n", root->NType);
@@ -363,11 +511,14 @@
 	    }
 	    
 	    printf("%s ", root->id->name);
-	  }	  
+	  }
+	  
+	  
 	}
 	
 	void freeAll()
 	{
+		printf("\n");
 		int i = 0, j = 0;
 		for(i=0; i<=sIndex; i++)
 		{
@@ -385,7 +536,7 @@
 %union { char *text; int depth; struct ASTNode* node;};
 %locations
    	  
-%token T_EndOfFile T_Return T_Number T_True T_False T_ID T_Print T_Cln T_NL T_EQL T_NEQ T_EQ T_GT T_LT T_EGT T_ELT T_Or T_And T_Not ID ND DD T_String Trip_Quote T_If T_Elif T_While T_Else T_Import T_Break T_Pass T_MN T_PL T_DV T_ML T_OP T_CP T_OB T_CB T_Def T_Comma T_Range T_List
+%token T_EndOfFile T_Return T_Number T_True T_False T_ID T_Print T_Cln T_NL T_EQL T_NEQ T_EQ T_GT T_LT T_EGT T_ELT T_Or T_And T_Not T_In ID ND DD T_String Trip_Quote T_If T_Elif T_While T_Else T_Import T_Break T_Pass T_MN T_PL T_DV T_ML T_OP T_CP T_OB T_CB T_Def T_Comma T_Range T_List
 
 %right T_EQL                                          
 %left T_PL T_MN
@@ -398,7 +549,7 @@
 
 %%
 
-StartDebugger : {init();} StartParse T_EndOfFile {printf("\nValid Python Syntax\n"); printSTable(); printAST($2); freeAll(); exit(0);} ;
+StartDebugger : {init();} StartParse T_EndOfFile {printf("\nValid Python Syntax\n"); printSTable(); /*printAST($2);*/ codeGenOp($2); freeAll(); exit(0);} ;
 
 constant : T_Number {insertRecord("Constant", $<text>1, @1.first_line, currentScope); $$ = createID_Const("Constant", $<text>1, currentScope);}
          | T_String {insertRecord("Constant", $<text>1, @1.first_line, currentScope); $$ = createID_Const("Constant", $<text>1, currentScope);};
@@ -407,9 +558,9 @@ term : T_ID {modifyRecordID("Identifier", $<text>1, @1.first_line, currentScope)
      | constant | list_index;
 
 
-list_index : T_ID T_OB constant T_CB {checkList($<text>1, @1.first_line, currentScope); $$ = createOp("ListIndex", 1, $3);};
+list_index : T_ID T_OB constant T_CB {checkList($<text>1, @1.first_line, currentScope); $$ = createOp("ListIndex", 2, createID_Const("Identifier", $<text>1, currentScope), $3);};
 
-StartParse : finalStatements T_NL {resetDepth();} StartParse {$$ = createOp("NewScope", 2, $1, $4);}| finalStatements {$$=$1;};
+StartParse : finalStatements T_NL {resetDepth();} StartParse {$$ = createOp("NewScope", 2, $1, $4);}| finalStatements T_NL {$$=$1;};
 
 basic_stmt : pass_stmt {$$=$1;}
            | break_stmt {$$=$1;}
@@ -434,6 +585,7 @@ bool_exp : bool_term T_Or bool_term {$$ = createOp("or", 2, $1, $3);}
          | arith_exp T_GT arith_exp {$$ = createOp(">", 2, $1, $3);}
          | arith_exp T_ELT arith_exp {$$ = createOp("<=", 2, $1, $3);}
          | arith_exp T_EGT arith_exp {$$ = createOp(">=", 2, $1, $3);}
+         | arith_exp T_In T_ID {checkList($<text>3, @3.first_line, currentScope); $$ = createOp("in", 2, $1, createID_Const("Constant", $<text>3, currentScope));}
          | bool_term {$$=$1;}; 
 
 bool_term : bool_factor {$$ = $1;}
@@ -449,7 +601,7 @@ pass_stmt : T_Pass {$$ = createOp("pass", 0);};
 break_stmt : T_Break {$$ = createOp("break", 0);};
 return_stmt : T_Return {$$ = createOp("return", 0);};;
 
-assign_stmt : T_ID T_EQL arith_exp { printf("Arithmatic Assign "); insertRecord("Identifier", $<text>1, @1.first_line, currentScope); $$ = createOp("=", 2, createID_Const("Identifier", $<text>1, currentScope), $3);}  
+assign_stmt : T_ID T_EQL arith_exp {insertRecord("Identifier", $<text>1, @1.first_line, currentScope); $$ = createOp("=", 2, createID_Const("Identifier", $<text>1, currentScope), $3);}  
             | T_ID T_EQL bool_exp {insertRecord("Identifier", $<text>1, @1.first_line, currentScope);$$ = createOp("=", 2, createID_Const("Identifier", $<text>1, currentScope), $3);}   
             | T_ID  T_EQL func_call {insertRecord("Identifier", $<text>1, @1.first_line, currentScope); $$ = createOp("=", 2, createID_Const("Identifier", $<text>1, currentScope), $3);} 
             | T_ID T_EQL T_OB T_CB {insertRecord("ListTypeID", $<text>1, @1.first_line, currentScope); $$ = createID_Const("ListTypeID", $<text>1, currentScope);} ;
@@ -481,6 +633,7 @@ suite : T_NL ND finalStatements suite {$$ = createOp("Next", 2, $3, $4);}
       | T_NL end_suite {$$ = $2;};
 
 end_suite : DD {updateCScope($<depth>1);} finalStatements {$$ = createOp("EndBlock", 1, $3);} 
+          | DD {updateCScope($<depth>1);} {$$ = createOp("EndBlock", 0);}
           | {$$ = createOp("EndBlock", 0);};
 
 args : T_ID  args_list {addToList($<text>1); $$ = createOp("Arguments", 1, argsList); clearArgsList();} 

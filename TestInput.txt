@@ -1,19 +1,12 @@
 import hWorld
 x=10
 y=10
-x+y
-listX = []
-def func():
-	while(listX[1]==y):
-		c=0
-		z=10
-		b=z
-		if(z==b):
-			c=10+b
-		if(x==y):
-			a=10
-		w=21
-	z=12
+z = x+y
+y = 2*z
+while(x==10):
+	c=x+y
+	if(c==z):
+		z=0
+	v=10
 
-if(x==y):
-	z=10
+z=10
