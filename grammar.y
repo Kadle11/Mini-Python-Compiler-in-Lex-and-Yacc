@@ -50,6 +50,7 @@
 		char *A1;
 		char *A2;
 		char *Op;
+		int I;
 	} Quad;
 	
 	STable *symbolTables = NULL;
@@ -123,6 +124,7 @@
 		strcpy(allQ[qIndex].A1, A1);
 		strcpy(allQ[qIndex].A2, A2);
 		strcpy(allQ[qIndex].Op, Op);
+		allQ[qIndex].I = qIndex;
 		qIndex++;
 		
 		return;
@@ -258,8 +260,19 @@
 		{
 			codeGenOp(opNode->NextLevel[0]);
 			codeGenOp(opNode->NextLevel[1]);
+			char *X1 = (char*)malloc(10);
+			char *X2 = (char*)malloc(10);
+			char *X3 = (char*)malloc(10);
+			
+			strcpy(X1, makeStr(opNode->nodeNo, 1));
+			strcpy(X2, makeStr(opNode->NextLevel[0]->nodeNo, 1));
+			strcpy(X3, makeStr(opNode->NextLevel[1]->nodeNo, 1));
+
 			printf("T%d = T%d %s T%d\n", opNode->nodeNo, opNode->NextLevel[0]->nodeNo, opNode->NType, opNode->NextLevel[1]->nodeNo);
-			makeQ(makeStr(opNode->nodeNo, 1), makeStr(opNode->NextLevel[0]->nodeNo, 1), makeStr(opNode->NextLevel[1]->nodeNo, 1), opNode->NType);
+			makeQ(X1, X2, X3, opNode->NType);
+			free(X1);
+			free(X2);
+			free(X3);
 			return;
 		}
 		
@@ -659,19 +672,53 @@
 	  
 	}
 	
+	int deadCodeElimination()
+	{
+		int i = 0, j = 0, flag = 1, XF=0;
+		while(flag==1)
+		{
+			
+			flag=0;
+			for(i=0; i<qIndex; i++)
+			{
+				XF=0;
+				if(!((strcmp(allQ[i].R, "-")==0) | (strcmp(allQ[i].Op, "Call")==0) | (strcmp(allQ[i].Op, "Label")==0) | (strcmp(allQ[i].Op, "goto")==0) | (strcmp(allQ[i].Op, "If False")==0)))
+				{
+					for(j=0; j<qIndex; j++)
+					{
+							if(((strcmp(allQ[i].R, allQ[j].A1)==0) && (allQ[j].I!=-1)) | ((strcmp(allQ[i].R, allQ[j].A2)==0) && (allQ[j].I!=-1)))
+							{
+								XF=1;
+							}
+					}
+				
+					if((XF==0) & (allQ[i].I != -1))
+					{
+						allQ[i].I = -1;
+						printf("%d", i);
+						flag=1;
+					}
+				}
+			}
+		}
+		return flag;
+	}
+	
 	void printQuads()
 	{
 		printf("\n--------------------------------All Quads---------------------------------\n");
 		int i = 0;
 		for(i=0; i<qIndex; i++)
 		{
-			printf("%s\t%s\t%s\t%s\n", allQ[i].Op, allQ[i].A1, allQ[i].A2, allQ[i].R);
+			printf("%d\t%s\t%s\t%s\t%s\n", allQ[i].I, allQ[i].Op, allQ[i].A1, allQ[i].A2, allQ[i].R);
 		}
-		printf("----------------------------------------------------------------------------\n");
+		printf("--------------------------------------------------------------------------\n");
 	}
 	
 	void freeAll()
 	{
+		deadCodeElimination();
+		printQuads();
 		printf("\n");
 		int i = 0, j = 0;
 		for(i=0; i<=sIndex; i++)

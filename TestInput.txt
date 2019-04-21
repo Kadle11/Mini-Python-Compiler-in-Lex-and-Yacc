@@ -3,6 +3,7 @@ x=10
 y=10
 
 #Comment1
+x+y
 listX = []
 
 def F1(A, B, C):
