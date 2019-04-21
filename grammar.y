@@ -44,12 +44,20 @@
 	
 	} node;
   
-
+	typedef struct Quad
+	{
+		char *R;
+		char *A1;
+		char *A2;
+		char *Op;
+	} Quad;
+	
 	STable *symbolTables = NULL;
-	int sIndex = -1, aIndex = -1, tabCount = 0, tIndex = 0 , lIndex = 0, nodeCount = 0;
+	int sIndex = -1, aIndex = -1, tabCount = 0, tIndex = 0 , lIndex = 0, qIndex = 0, nodeCount = 0;
 	node *rootNode;
 	char *argsList = NULL;
 	char *tString = NULL, *lString = NULL;
+	Quad *allQ = NULL;
 	
 	/*-----------------------------Declarations----------------------------------*/
 	
@@ -69,8 +77,56 @@
 	void freeAll();
 	void addToList(char *newVal, int flag);
 	void clearArgsList();
-	
+	int checkIfBinOperator(char *Op);
 	/*------------------------------------------------------------------------------*/
+	
+	void Xitoa(int num, char *str)
+	{
+		if(str == NULL)
+		{
+			 printf("Allocate Memory\n");
+		   return;
+		}
+		sprintf(str, "%d", num);
+	}
+
+	
+	char *makeStr(int no, int flag)
+	{
+		char A[10];
+		Xitoa(no, A);
+		
+		if(flag==1)
+		{
+				strcpy(tString, "T");
+				strcat(tString, A);
+				return tString;
+		}
+		else
+		{
+				strcpy(lString, "L");
+				strcat(lString, A);
+				return lString;
+		}
+
+	}
+	
+	void makeQ(char *R, char *A1, char *A2, char *Op)
+	{
+		
+		allQ[qIndex].R = (char*)malloc(strlen(R)+1);
+		allQ[qIndex].Op = (char*)malloc(strlen(Op)+1);
+		allQ[qIndex].A1 = (char*)malloc(strlen(A1)+1);
+		allQ[qIndex].A2 = (char*)malloc(strlen(A2)+1);
+		
+		strcpy(allQ[qIndex].R, R);
+		strcpy(allQ[qIndex].A1, A1);
+		strcpy(allQ[qIndex].A2, A2);
+		strcpy(allQ[qIndex].Op, Op);
+		qIndex++;
+		
+		return;
+	}
 	
 	int checkIfBinOperator(char *Op)
 	{
@@ -98,6 +154,7 @@
 			if((!strcmp(opNode->id->type, "Identifier")) || (!strcmp(opNode->id->type, "Constant")))
 			{
 				printf("T%d = %s\n", opNode->nodeNo, opNode->id->name);
+				makeQ(makeStr(opNode->nodeNo, 1), opNode->id->name, "-", "=");
 			}
 			return;
 		}
@@ -111,18 +168,23 @@
 					int temp = lIndex;
 					codeGenOp(opNode->NextLevel[0]);
 					printf("If False T%d goto L%d\n", opNode->NextLevel[0]->nodeNo, lIndex);
+					makeQ(makeStr(temp, 0), makeStr(opNode->NextLevel[0]->nodeNo, 1), "-", "If False");
 					lIndex++;
 					codeGenOp(opNode->NextLevel[1]);
 					lIndex--;
 					printf("L%d: ", temp);
+					makeQ(makeStr(temp, 0), "-", "-", "Label");
 					break;
 				}
 				case 3 : 
 				{
+					int temp = lIndex;
 					codeGenOp(opNode->NextLevel[0]);
 					printf("If False T%d goto L%d\n", opNode->NextLevel[0]->nodeNo, lIndex);
+					makeQ(makeStr(temp, 0), makeStr(opNode->NextLevel[0]->nodeNo, 1), "-", "If False");					
 					codeGenOp(opNode->NextLevel[1]);
-					printf("L%d: ", lIndex);
+					printf("L%d: ", temp);
+					makeQ(makeStr(temp, 0), "-", "-", "Label");
 					codeGenOp(opNode->NextLevel[2]);
 					lIndex++;
 					break;
@@ -142,10 +204,14 @@
 			int temp = lIndex;
 			codeGenOp(opNode->NextLevel[0]);
 			printf("L%d: If False T%d goto L%d\n", lIndex, opNode->NextLevel[0]->nodeNo, lIndex+1);
+			makeQ(makeStr(temp, 0), "-", "-", "Label");		
+			makeQ(makeStr(temp+1, 0), makeStr(opNode->NextLevel[0]->nodeNo, 1), "-", "If False");								
 			lIndex+=2;			
 			codeGenOp(opNode->NextLevel[1]);
 			printf("goto L%d\n", temp);
-			printf("L%d: ", temp+1); 
+			makeQ(makeStr(temp, 0), "-", "-", "goto");
+			printf("L%d: ", temp+1);
+			makeQ(makeStr(temp+1, 0), "-", "-", "Label"); 
 			lIndex = lIndex+2;
 			return;
 		}
@@ -183,7 +249,8 @@
 		
 		if(!strcmp(opNode->NType, "ListIndex"))
 		{
-			printf("T%d = %s[%s]", opNode->nodeNo, opNode->NextLevel[0]->id->name, opNode->NextLevel[1]->id->name);
+			printf("T%d = %s[%s]\n", opNode->nodeNo, opNode->NextLevel[0]->id->name, opNode->NextLevel[1]->id->name);
+			makeQ(makeStr(opNode->nodeNo, 1), opNode->NextLevel[0]->id->name, opNode->NextLevel[1]->id->name, "=[]");
 			return;
 		}
 		
@@ -192,12 +259,14 @@
 			codeGenOp(opNode->NextLevel[0]);
 			codeGenOp(opNode->NextLevel[1]);
 			printf("T%d = T%d %s T%d\n", opNode->nodeNo, opNode->NextLevel[0]->nodeNo, opNode->NType, opNode->NextLevel[1]->nodeNo);
+			makeQ(makeStr(opNode->nodeNo, 1), makeStr(opNode->NextLevel[0]->nodeNo, 1), makeStr(opNode->NextLevel[1]->nodeNo, 1), opNode->NType);
 			return;
 		}
 		
 		if(!strcmp(opNode->NType, "import"))
 		{
 			printf("import %s\n", opNode->NextLevel[0]->id->name);
+			makeQ("-", opNode->NextLevel[0]->id->name, "-", "import");
 			return;
 		}
 		
@@ -212,14 +281,17 @@
 		{
 			codeGenOp(opNode->NextLevel[1]);
 			printf("%s = T%d\n", opNode->NextLevel[0]->id->name, opNode->NextLevel[1]->nodeNo);
+			makeQ(opNode->NextLevel[0]->id->name, makeStr(opNode->NextLevel[1]->nodeNo, 1), "-", opNode->NType);
 			return;
 		}
 		
 		if(!strcmp(opNode->NType, "Func_Name"))
 		{
 			printf("Begin Function %s\n", opNode->NextLevel[0]->id->name);
+			makeQ("-", opNode->NextLevel[0]->id->name, "-", "BeginF");
 			codeGenOp(opNode->NextLevel[2]);
 			printf("End Function %s\n", opNode->NextLevel[0]->id->name);
+			makeQ("-", opNode->NextLevel[0]->id->name, "-", "EndF");
 			return;
 		}
 		
@@ -227,41 +299,48 @@
 		{
 			if(!strcmp(opNode->NextLevel[1]->NType, "Void"))
 			{
-				printf("Call Function %s\n", opNode->NextLevel[0]->id->name);
+				printf("(T%d)Call Function %s\n", opNode->nodeNo, opNode->NextLevel[0]->id->name);
+				makeQ(makeStr(opNode->nodeNo, 1), opNode->NextLevel[0]->id->name, "-", "Call");
 			}
 			else
 			{
+				char A[10];
 				char* token = strtok(opNode->NextLevel[1]->NType, ","); 
   			int i = 0;
 				while (token != NULL) 
 				{
 						i++; 
-				    printf("Push Param %s\n", token); 
+				    printf("Push Param %s\n", token);
+				    makeQ("-", token, "-", "Param"); 
 				    token = strtok(NULL, ","); 
 				}
 				
-				printf("Call Function %s, %d\n", opNode->NextLevel[0]->id->name, i);
+				printf("(T%d)Call Function %s, %d\n", opNode->nodeNo, opNode->NextLevel[0]->id->name, i);
+				sprintf(A, "%d", i);
+				makeQ(makeStr(opNode->nodeNo, 1), opNode->NextLevel[0]->id->name, A, "Call");
 				printf("Pop Params for Function %s, %d\n", opNode->NextLevel[0]->id->name, i);
 								
 				return;
 			}
-		}
+		}		
 		
 		if(opNode->noOps == 0)
 		{
 			if(!strcmp(opNode->NType, "break"))
 			{
 				printf("goto L%d\n", lIndex);
+				makeQ(makeStr(lIndex, 0), "-", "-", "goto");
 			}
 
 			if(!strcmp(opNode->NType, "pass"))
 			{
-				;
+				makeQ("-", "-", "-", "pass");
 			}
 
 			if(!strcmp(opNode->NType, "return"))
 			{
 				printf("return\n");
+				makeQ("-", "-", "-", "return");
 			}
 		}
 		
@@ -313,7 +392,7 @@
 		{
 			strcat(argsList, newVal);
 		}
-    printf("\n\t%s\n", argsList);
+    //printf("\n\t%s\n", newVal);
   }
   
   void clearArgsList()
@@ -374,6 +453,9 @@
 		initNewTable(1);
 		argsList = (char *)malloc(100);
 		strcpy(argsList, "");
+		tString = (char*)calloc(10, sizeof(char));
+		lString = (char*)calloc(10, sizeof(char));
+		allQ = (Quad*)calloc(1000, sizeof(Quad));
 	}
 
 	int searchRecordInScope(const char* type, const char *name, int index)
@@ -577,6 +659,17 @@
 	  
 	}
 	
+	void printQuads()
+	{
+		printf("\n--------------------------------All Quads---------------------------------\n");
+		int i = 0;
+		for(i=0; i<qIndex; i++)
+		{
+			printf("%s\t%s\t%s\t%s\n", allQ[i].Op, allQ[i].A1, allQ[i].A2, allQ[i].R);
+		}
+		printf("----------------------------------------------------------------------------\n");
+	}
+	
 	void freeAll()
 	{
 		printf("\n");
@@ -591,6 +684,7 @@
 			free(symbolTables[i].Elements);
 		}
 		free(symbolTables);
+		free(allQ);
 	}
 %}
 
@@ -610,7 +704,7 @@
 
 %%
 
-StartDebugger : {init();} StartParse T_EndOfFile {printf("\nValid Python Syntax\n"); printSTable(); /*printAST($2);*/ codeGenOp($2); freeAll(); exit(0);} ;
+StartDebugger : {init();} StartParse T_EndOfFile {printf("\nValid Python Syntax\n"); printSTable(); /*printAST($2);*/ codeGenOp($2); printQuads(); freeAll(); exit(0);} ;
 
 constant : T_Number {insertRecord("Constant", $<text>1, @1.first_line, currentScope); $$ = createID_Const("Constant", $<text>1, currentScope);}
          | T_String {insertRecord("Constant", $<text>1, @1.first_line, currentScope); $$ = createID_Const("Constant", $<text>1, currentScope);};
@@ -620,7 +714,7 @@ term : T_ID {modifyRecordID("Identifier", $<text>1, @1.first_line, currentScope)
      | list_index {$$ = $1;};
 
 
-list_index : T_ID T_OB constant T_CB {checkList($<text>1, @1.first_line, currentScope); $$ = createOp("ListIndex", 2, createID_Const("Identifier", $<text>1, currentScope), $3);};
+list_index : T_ID T_OB constant T_CB {checkList($<text>1, @1.first_line, currentScope); $$ = createOp("ListIndex", 2, createID_Const("ListTypeID", $<text>1, currentScope), $3);};
 
 StartParse : T_NL StartParse {$$=$2;}| finalStatements T_NL {resetDepth();} StartParse {$$ = createOp("NewScope", 2, $1, $4);}| finalStatements T_NL {$$=$1;};
 
