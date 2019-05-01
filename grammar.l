@@ -18,16 +18,17 @@
  		#ifdef DEBUG
  		if(startFlag)
  		{
- 			printf("1 ");
+ 			printf("---------------------------------Token Sequence--------------------------\n1 ");
  			startFlag=0;
  		}
+ 		
  		if(strcmp(X, "NL")==0)
  		{
- 			printf("%s\n%d ", X, yylineno);
+ 			printf("T_%s\n%d ", X, yylineno);
  		}
 		else
 		{
-			printf("%s ", X);	
+			printf("T_%s ", X);	
 		}
  		#endif
  	}
@@ -134,7 +135,6 @@ Multiline_comment \'\'\'.+\'\'\'
 "]" {debug("CB"); return T_CB;}
 "," {debug("Comma"); return T_Comma;}
 "=" {debug("EQL"); return T_EQL;}
-"range" {debug("Range"); return T_Range;}
 "list" {debug("List"); return T_List;}
 [0-9]+ {yylval.text = strdup(yytext); debug(yylval.text); return T_Number;}
 [_a-zA-Z][_a-zA-Z0-9]* {yylval.text = strdup(yytext); debug(yylval.text); return T_ID;}

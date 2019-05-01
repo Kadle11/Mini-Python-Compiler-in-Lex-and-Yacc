@@ -69,26 +69,24 @@ extern int yydebug;
     ND = 279,
     DD = 280,
     T_String = 281,
-    Trip_Quote = 282,
-    T_If = 283,
-    T_Elif = 284,
-    T_While = 285,
-    T_Else = 286,
-    T_Import = 287,
-    T_Break = 288,
-    T_Pass = 289,
-    T_MN = 290,
-    T_PL = 291,
-    T_DV = 292,
-    T_ML = 293,
-    T_OP = 294,
-    T_CP = 295,
-    T_OB = 296,
-    T_CB = 297,
-    T_Def = 298,
-    T_Comma = 299,
-    T_Range = 300,
-    T_List = 301
+    T_If = 282,
+    T_Elif = 283,
+    T_While = 284,
+    T_Else = 285,
+    T_Import = 286,
+    T_Break = 287,
+    T_Pass = 288,
+    T_MN = 289,
+    T_PL = 290,
+    T_DV = 291,
+    T_ML = 292,
+    T_OP = 293,
+    T_CP = 294,
+    T_OB = 295,
+    T_CB = 296,
+    T_Def = 297,
+    T_Comma = 298,
+    T_List = 299
   };
 #endif
 /* Tokens.  */
@@ -116,36 +114,34 @@ extern int yydebug;
 #define ND 279
 #define DD 280
 #define T_String 281
-#define Trip_Quote 282
-#define T_If 283
-#define T_Elif 284
-#define T_While 285
-#define T_Else 286
-#define T_Import 287
-#define T_Break 288
-#define T_Pass 289
-#define T_MN 290
-#define T_PL 291
-#define T_DV 292
-#define T_ML 293
-#define T_OP 294
-#define T_CP 295
-#define T_OB 296
-#define T_CB 297
-#define T_Def 298
-#define T_Comma 299
-#define T_Range 300
-#define T_List 301
+#define T_If 282
+#define T_Elif 283
+#define T_While 284
+#define T_Else 285
+#define T_Import 286
+#define T_Break 287
+#define T_Pass 288
+#define T_MN 289
+#define T_PL 290
+#define T_DV 291
+#define T_ML 292
+#define T_OP 293
+#define T_CP 294
+#define T_OB 295
+#define T_CB 296
+#define T_Def 297
+#define T_Comma 298
+#define T_List 299
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 
 union YYSTYPE
 {
-#line 738 "grammar.y" /* yacc.c:1909  */
+#line 837 "grammar.y" /* yacc.c:1909  */
  char *text; int depth; struct ASTNode* node;
 
-#line 149 "y.tab.h" /* yacc.c:1909  */
+#line 145 "y.tab.h" /* yacc.c:1909  */
 };
 
 typedef union YYSTYPE YYSTYPE;
